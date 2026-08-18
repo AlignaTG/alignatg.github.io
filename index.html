@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contador de Piscadas & Monitor de Postura</title>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
     <h1>Detector de Piscadas & Postura</h1>
     <p>Processamento local rodando 100% no seu navegador via GPU</p>
 
@@ -16,9 +16,10 @@
         <canvas id="output" width="640" height="480"></canvas>
     </div>
 
-    <!-- Controles de Postura e Calibração -->
+    <!-- Controles de Postura, Calibração e Histórico -->
     <div class="controls-container">
         <button id="btn-calibrar" class="btn">Calibrar Distância Ideal (Foto)</button>
+        <button id="btn-historico" class="btn btn-secondary">📊 Ver Histórico de Piscadas</button>
         <div id="distancia-calibrada" class="info-badge">Distância base: Não definida</div>
     </div>
 
@@ -26,7 +27,21 @@
     <div id="alerta-postura" class="alerta-postura hidden"></div>
     <div id="ear-value" class="info-ear">EAR: -- | Distância: --</div>
 
+    <!-- Modal para Exibição do Histórico / Gráfico -->
+    <div id="modal-historico" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Histórico de Piscadas por Minuto</h2>
+                <button id="btn-fechar-modal" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <canvas id="grafico-piscadas" width="600" height="300"></canvas>
+                <div id="historico-lista"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Carrega a lógica e as bibliotecas do arquivo externo -->
-    <script type="module" src="./script.js"></script>
+    <script type="module" src="./js/main.js"></script>
 </body>
 </html>

@@ -116,7 +116,7 @@ function verificarPostura(distanciaAtual) {
     // Exibe ou oculta alerta visual de postura
     if (alertaPosturaAtivo) {
         alertaPosturaDiv.classList.remove('hidden');
-        alertaPosturaDiv.innerText = "🚨 ALERTA DE POSTURA: Você está muito perto da tela há mais de 2 minutos! Recoste-se na cadeira.";
+        alertaPosturaDiv.innerText = "🚨 ALERTA DE POSTURA: Você está muito perto da tela";
     } else {
         alertaPosturaDiv.classList.add('hidden');
     }

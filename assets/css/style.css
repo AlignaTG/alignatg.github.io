@@ -1,0 +1,227 @@
+/* ==========================================================================
+   ESTILOS GERAIS E ESTRUTURA
+   ========================================================================== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    background: #0b132b; /* Azul escuro profundo */
+    color: #e0e6ed;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #4cc9f0; /* Azul claro / Ciano vibrante */
+    margin-bottom: 5px;
+}
+
+p {
+    color: #8d99ae;
+    margin-top: 0;
+}
+
+/* ==========================================================================
+   CONTAINER DE VÍDEO E CANVAS DA WEBCAM
+   ========================================================================== */
+.container {
+    position: relative;
+    width: 640px;
+    height: 480px;
+    margin: 20px auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 15px rgba(76, 201, 240, 0.1);
+    background: #1c2541;
+    border: 1px solid #2a3a5e;
+}
+
+/* Aplica o espelhamento e sobreposição APENAS nos elementos da webcam */
+#webcam, #output {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 640px;
+    height: 480px;
+    transform: scaleX(-1); /* Espelha o vídeo e os landmarks faciais */
+}
+
+#webcam {
+    opacity: 0.4; /* Suaviza o feed de vídeo para dar destaque aos landmarks */
+}
+
+/* ==========================================================================
+   MÉTRICAS E STATUS
+   ========================================================================== */
+#status-container {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 15px;
+    color: #4cc9f0;
+}
+
+.info-ear {
+    font-size: 14px;
+    color: #8d99ae;
+    margin-top: 5px;
+}
+
+.info-badge {
+    padding: 8px 12px;
+    background-color: #1c2541;
+    color: #a5b4fc;
+    border: 1px solid #2a3a5e;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: monospace;
+}
+
+/* ==========================================================================
+   CONTROLES E BOTÕES
+   ========================================================================== */
+.controls-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.btn {
+    background-color: #3a86ff; /* Azul vibrante de ação */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn:hover {
+    background-color: #2563eb;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Botão com ícone (Histórico) */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #1c2541;
+    border: 1px solid #3a86ff;
+    color: #e0e6ed;
+}
+
+.btn-icon:hover {
+    background-color: #2a3a5e;
+}
+
+.icon-img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    display: block;
+}
+
+/* ==========================================================================
+   ALERTAS
+   ========================================================================== */
+.alerta-postura {
+    margin: 10px auto;
+    max-width: 640px;
+    background-color: #e63946; /* Vermelho destacado */
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+    animation: pulse 1s infinite alternate;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes pulse {
+    from { opacity: 0.85; transform: scale(0.99); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ==========================================================================
+   MODAL DE HISTÓRICO & GRÁFICO
+   ========================================================================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(11, 19, 43, 0.85); /* Fundo com overlay escuro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: #1c2541;
+    color: #e0e6ed;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 680px;
+    border: 1px solid #2a3a5e;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+    text-align: left;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #2a3a5e;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #4cc9f0;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #8d99ae;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.btn-close:hover {
+    color: #e63946;
+}
+
+.modal-body {
+    width: 100%;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* Canvas do Chart.js: Garante que fique desespelhado e relativo ao modal */
+#grafico-piscadas {
+    position: relative !important;
+    width: 100% !important;
+    height: 280px !important;
+    transform: none !important; /* Remove qualquer espelhamento */
+    display: block;
+}
