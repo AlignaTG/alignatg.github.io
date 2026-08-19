@@ -27,28 +27,32 @@ p {
     position: relative;
     width: 100%;
     max-width: 640px;
-    aspect-ratio: 4 / 3;
     margin: 20px auto;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 15px rgba(76, 201, 240, 0.1);
     background: #1c2541;
     border: 1px solid #2a3a5e;
+    /* Aplica o espelhamento diretamente no container pai */
+    transform: scaleX(-1);
 }
 
 /* Espelhamento e sobreposição idêntica no vídeo e canvas */
-#webcam, #output {
+#webcam {
+    display: block;
+    width: 100%;
+    height: auto;
+    opacity: 0.4;
+}
+
+/* O canvas sobrepõe exatamente o espaço ocupado pelo vídeo */
+#output {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1);
-}
-
-#webcam {
-    opacity: 0.4;
+    pointer-events: none;
 }
 
 /* ==========================================================================
