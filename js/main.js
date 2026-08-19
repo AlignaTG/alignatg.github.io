@@ -41,14 +41,13 @@ let alertaPosturaAudioTocado = false;
 let instanciaGrafico = null; // Guarda a instância do Chart.js
 
 // ============================================================================
-// FUNÇÃO PARA RENDERIZAR O GRÁFICO (Chart.js)
+// FUNÇÃO PARA RENDERIZAR O GRÁFICO (Chart.js Responsivo e Estilizado)
 // ============================================================================
 function renderizarGraficoPiscadas() {
     const historico = getHistoricoPiscadas();
 
     if (!canvasGrafico) return;
 
-    // Destrói o gráfico anterior se já existir
     if (instanciaGrafico) {
         instanciaGrafico.destroy();
     }
@@ -58,27 +57,36 @@ function renderizarGraficoPiscadas() {
     const dadosMeta = historico.map(h => h.metaMinima || 10);
 
     const ctxGrafico = canvasGrafico.getContext('2d');
+
+    // Gradiente suave no preenchimento da curva
+    const gradient = ctxGrafico.createLinearGradient(0, 0, 0, 220);
+    gradient.addColorStop(0, 'rgba(76, 201, 240, 0.35)');
+    gradient.addColorStop(1, 'rgba(76, 201, 240, 0.0)');
+
     instanciaGrafico = new Chart(ctxGrafico, {
         type: 'line',
         data: {
             labels: labels.length > 0 ? labels : ['Sem dados ainda'],
             datasets: [
                 {
-                    label: 'Piscadas por Minuto (PPM)',
+                    label: 'PPM (Atual)',
                     data: dadosPiscadas.length > 0 ? dadosPiscadas : [0],
                     borderColor: '#4cc9f0',
-                    backgroundColor: 'rgba(76, 201, 240, 0.2)',
+                    backgroundColor: gradient,
                     fill: true,
-                    tension: 0.3,
-                    borderWidth: 2,
-                    pointRadius: 5,
-                    pointBackgroundColor: '#4cc9f0'
+                    tension: 0.35,
+                    borderWidth: 2.5,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#4cc9f0',
+                    pointBorderColor: '#0b132b'
                 },
                 {
-                    label: 'Meta Mínima Recomendada',
+                    label: 'Meta Mínima',
                     data: dadosMeta.length > 0 ? dadosMeta : [10],
-                    borderColor: '#e63946',
+                    borderColor: '#f72585',
                     borderDash: [5, 5],
+                    borderWidth: 1.5,
                     fill: false,
                     pointRadius: 0
                 }
@@ -86,20 +94,46 @@ function renderizarGraficoPiscadas() {
         },
         options: {
             responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#2a3a5e' },
-                    ticks: { color: '#e0e6ed' }
-                },
-                x: {
-                    grid: { color: '#2a3a5e' },
-                    ticks: { color: '#e0e6ed' }
-                }
-            },
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    labels: { color: '#e0e6ed' }
+                    position: 'top',
+                    labels: {
+                        color: '#e0e6ed',
+                        font: { size: 12, family: 'Segoe UI' },
+                        boxWidth: 12,
+                        padding: 12
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#0b132b',
+                    titleColor: '#4cc9f0',
+                    bodyColor: '#e0e6ed',
+                    borderColor: '#2a3a5e',
+                    borderWidth: 1,
+                    padding: 10,
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: '#8d99ae',
+                        font: { size: 11 },
+                        maxRotation: 0
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.06)'
+                    },
+                    ticks: {
+                        color: '#8d99ae',
+                        font: { size: 11 },
+                        stepSize: 5
+                    }
                 }
             }
         }
@@ -111,6 +145,12 @@ function renderizarGraficoPiscadas() {
 // ============================================================================
 async function processarVideo() {
     if (video.readyState >= 2) {
+        // Sincronização contínua das dimensões internas do Canvas com a resolução real da câmera
+        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+        }
+
         const faces = await detector.estimateFaces(video, { flipHorizontal: false });
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -238,7 +278,7 @@ btnCalibrar.addEventListener('click', async () => {
 
 // Inicialização Principal
 async function main() {
-    await iniciarCamera(video, statusDiv);
+    await iniciarCamera(video, canvas, statusDiv);
     video.play();
 
     statusDiv.innerText = "Carregando FaceMesh (Aguarde)...";
