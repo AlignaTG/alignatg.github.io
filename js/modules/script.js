@@ -185,7 +185,14 @@ async function processarVideo() {
             earDiv.innerText = "EAR: -- | Distância: --";
         }
     }
-    requestAnimationFrame(processarVideo);
+    if (document.hidden) {
+        // Quando a aba/janela estiver minimizada ou em segundo plano
+        // Roda via setTimeout (~10 FPS) para não pausar
+        setTimeout(processarVideo, 100);
+    } else {
+        // Quando a janela estiver ativa na tela, mantém fluído a 60 FPS
+        requestAnimationFrame(processarVideo);
+    }
 }
 
 // Botão para registrar a "foto" / calibração da posição ideal do usuário

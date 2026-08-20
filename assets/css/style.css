@@ -1,50 +1,203 @@
-/* ==========================================================================
-   ESTILOS GERAIS E ESTRUTURA (TEMA DARK GEMINI)
-   ========================================================================== */
-body {
-    font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    text-align: center;
-    background: #131314;
-    color: #e3e3e3;
-    margin: 0;
-    padding: 20px;
+:root {
+    --bg-main: #0c0e12;
+    --bg-card: #15181e;
+    --bg-card-hover: #1c212b;
+    --border-color: #242b35;
+    --accent-green: #00ff88;
+    --accent-blue: #4cc9f0;
+    --accent-pink: #ff3333;
+    --text-primary: #f0f3f6;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --radius-lg: 16px;
+    --radius-md: 10px;
 }
 
-h1 {
-    color: #e3e3e3;
-    font-size: 26px;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   Overlay de Carregamento
+   ========================================================================== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(12, 14, 18, 0.95);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 480px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.loading-guide-img {
+    width: 100%;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--accent-green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   Navbar
+   ========================================================================== */
+.navbar {
+    width: 100%;
+    max-width: 1000px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-logo {
+    width: 32px;
+    height: 32px;
+}
+
+.brand-name {
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.5px;
+}
+
+.privacy-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    color: var(--accent-green);
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    box-shadow: 0 0 8px var(--accent-green);
+    animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+/* ==========================================================================
+   Container & Câmera
+   ========================================================================== */
+.main-container {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px;
+    flex-grow: 1;
+}
+
+.hero-text {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.hero-text h1 {
+    font-size: 1.35rem;
     font-weight: 600;
     margin-bottom: 6px;
 }
 
-p {
-    color: #c4c7c5;
-    font-size: 14px;
-    margin-top: 0;
+.status-indicator {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-height: 24px;
 }
 
-/* ==========================================================================
-   CONTAINER DE VÍDEO E CANVAS DA WEBCAM (RESPONSIVO)
-   ========================================================================== */
-.container {
+.camera-wrapper {
     position: relative;
-    width: 100%;
-    max-width: 640px;
-    margin: 20px auto;
-    border-radius: 20px;
-    overflow: hidden; /* Corta o excesso do zoom internamente */
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
-    background: #1e1f20;
-    border: 1px solid #3c4043;
-    transform: scaleX(-1); /* Espelha tudo junto */
+    border-radius: var(--radius-lg);
+    padding: 3px;
+    background: linear-gradient(180deg, var(--border-color) 0%, transparent 100%);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    margin-bottom: 18px;
+}
+
+.video-container {
+    position: relative;
+    width: 640px;
+    height: 480px;
+    max-width: 100%;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: #000;
 }
 
 #webcam {
-    display: block;
     width: 100%;
-    height: auto;
-    opacity: 0.55;
-    transition: transform 0.2s ease;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1); /* Espelho natural */
 }
 
 #output {
@@ -53,109 +206,162 @@ p {
     left: 0;
     width: 100%;
     height: 100%;
+    transform: scaleX(-1); /* Espelho alinhado com o vídeo */
     pointer-events: none;
-    transition: transform 0.2s ease;
 }
 
 /* ==========================================================================
-   MÉTRICAS E STATUS
+   Painel de Controles & Badges
    ========================================================================== */
-#status-container {
-    font-size: 20px;
-    font-weight: 600;
-    margin-top: 18px;
-    color: #a8c7fa;
-}
-
-.info-ear {
-    font-size: 14px;
-    color: #8e918f;
-    margin-top: 6px;
-    font-family: monospace;
-}
-
-.info-badge {
-    padding: 8px 14px;
-    background-color: #1e1f20;
-    color: #c4c7c5;
-    border: 1px solid #3c4043;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: monospace;
-}
-
-/* ==========================================================================
-   CONTROLES E BOTÕES
-   ========================================================================== */
-.controls-container {
+.controls-panel {
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
     gap: 12px;
-    margin: 18px 0;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .btn {
-    background-color: #a8c7fa;
-    color: #041e49;
-    border: none;
-    padding: 10px 22px;
-    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
     font-weight: 600;
-    border-radius: 100px;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-}
-
-.btn:hover {
-    background-color: #d3e3fd;
+    border: none;
+    transition: transform 0.15s ease, background-color 0.2s ease;
 }
 
 .btn:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
 }
 
-/* Botão Secundário (Histórico) */
-.btn-secondary, .btn-icon {
-    background-color: #1e1f20;
-    border: 1px solid #444746;
-    color: #e3e3e3;
+.btn-primary {
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
-.btn-secondary:hover, .btn-icon:hover {
-    background-color: #282a2c;
+.btn-primary:hover {
+    background: #ffffff;
 }
 
-.icon-img {
-    width: 18px;
-    height: 18px;
-    object-fit: contain;
-    display: block;
+.btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-card-hover);
+}
+
+.badge-calibrada {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+}
+
+.telemetry-bar {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-family: monospace;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+}
+
+.app-version {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-bottom: 24px;
 }
 
 /* ==========================================================================
-   ALERTAS IN-LINE (SE USADO)
+   Toasts & Pop-ups (Controlados pelo seu main.js)
    ========================================================================== */
-.alerta-postura {
-    margin: 12px auto;
-    max-width: 640px;
-    background-color: #2d1517;
-    color: #f28b82;
-    border: 1px solid #ea4335;
-    padding: 12px;
-    border-radius: 12px;
-    font-weight: 600;
-    text-align: center;
-    box-shadow: 0 4px 16px rgba(234, 67, 53, 0.2);
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10000;
+    pointer-events: none;
 }
 
-.hidden {
-    display: none !important;
+.toast {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 12px 18px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: auto;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-postura {
+    border-left: 4px solid #ffaa00;
+}
+
+.toast-piscada {
+    border-left: 4px solid var(--accent-pink);
+}
+
+.toast-fechar {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.toast-fechar:hover {
+    color: var(--text-primary);
+}
+
+/* Toast Grande Central de Alerta */
+#toast-postura-grande {
+    position: fixed;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(239, 68, 68, 0.95);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 20px 30px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 50px rgba(239, 68, 68, 0.4);
+    z-index: 10001;
+    border: none;
+}
+
+#toast-postura-grande.show {
+    transform: translate(-50%, -50%) scale(1);
 }
 
 /* ==========================================================================
-   MODAL DE HISTÓRICO & GRÁFICO
+   Modal do Gráfico
    ========================================================================== */
 .modal {
     position: fixed;
@@ -163,179 +369,79 @@ p {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
     display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(8px);
+    justify-content: center;
+    z-index: 9000;
+}
+
+.modal.hidden {
+    display: none;
 }
 
 .modal-content {
-    background-color: #1e1f20;
-    color: #e3e3e3;
-    border-radius: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 24px;
     width: 90%;
-    max-width: 580px;
-    box-sizing: border-box;
-    border: 1px solid #3c4043;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8);
+    max-width: 650px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #3c4043;
-    padding-bottom: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
-.modal-header h2 {
-    margin: 0;
-    font-size: 18px;
-    color: #e3e3e3;
-}
-
-.btn-close {
-    background: none;
+.modal-close {
+    background: transparent;
     border: none;
-    font-size: 1.8rem;
-    color: #8e918f;
+    color: var(--text-secondary);
+    font-size: 1.6rem;
     cursor: pointer;
-    line-height: 1;
-    transition: color 0.2s;
 }
 
-.btn-close:hover {
-    color: #f28b82;
+.modal-close:hover {
+    color: var(--text-primary);
 }
 
-.modal-body {
-    width: 100%;
+.chart-container {
     position: relative;
-    height: 260px;
+    height: 280px;
+    width: 100%;
 }
 
-#grafico-piscadas {
-    width: 100% !important;
-    height: 100% !important;
+@media (max-width: 680px) {
+    .video-container {
+        height: 320px;
+    }
 }
 
-.app-version {
-    margin-top: 35px;
-    padding-bottom: 10px;
-    font-size: 12px;
-    color: #5e5e5e;
-    letter-spacing: 0.5px;
-    font-family: monospace;
+.toast-svg-icon {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 6px;
+    display: inline-block;
 }
 
-/* ==========================================================================
-   SISTEMA DE POP-UPS / TOAST NOTIFICATIONS (ESTILO GEMINI)
-   ========================================================================== */
-.toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 380px;
-    width: calc(100% - 40px);
-    pointer-events: none;
+.toast-svg-icon-grande {
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+    margin-right: 8px;
+    display: inline-block;
 }
 
-.toast {
-    pointer-events: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    border-radius: 14px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #e3e3e3;
-    background: #1e1f20;
-    border: 1px solid #3c4043;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    opacity: 0;
-    transform: translateY(-15px) scale(0.96);
-    transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
-}
-
-.toast.show {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-}
-
-/* Notificação lateral de postura */
-.toast-postura {
-    background: #251a1b;
-    border: 1px solid #ea4335;
-    color: #f28b82;
-}
-
-/* Notificação lateral de piscadas */
-.toast-piscada {
-    background: #1e222a;
-    border: 1px solid #7cacf8;
-    color: #a8c7fa;
-}
-
-.toast-fechar {
-    background: none;
-    border: none;
-    color: #8e918f;
-    font-size: 18px;
-    cursor: pointer;
-    margin-left: 12px;
-    line-height: 1;
-}
-
-.toast-fechar:hover {
-    color: #e3e3e3;
-}
-
-/* ==========================================================================
-   POP-UP GRANDE CENTRALIZADO (ESTILO GEMINI DARK)
-   ========================================================================== */
-.toast-postura-grande {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.9);
-    background: rgba(30, 31, 32, 0.96);
-    backdrop-filter: blur(12px);
-    border: 1.5px solid #ea4335;
-    box-shadow: 0 0 35px rgba(234, 67, 53, 0.35), 0 20px 50px rgba(0, 0, 0, 0.9);
-    color: #fce8e6;
-    font-size: 22px;
-    font-weight: 600;
-    padding: 24px 36px;
-    border-radius: 24px;
-    z-index: 10000;
-    max-width: 90%;
-    width: auto;
-    text-align: center;
-    pointer-events: auto;
-    opacity: 0;
-    transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s ease;
-}
-
-.toast-postura-grande.show {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}
-
-.toast-postura-grande .toast-fechar {
-    font-size: 26px;
-    margin-left: 20px;
-    color: #8e918f;
-}
-
-.toast-postura-grande .toast-fechar:hover {
-    color: #f28b82;
+.status-svg-icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+    margin-right: 4px;
+    display: inline-block;
 }

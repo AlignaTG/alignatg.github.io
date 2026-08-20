@@ -6,7 +6,6 @@ export async function iniciarCamera(videoElement, canvasElement, statusElement) 
         const stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: "user",
-                // 'ideal' permite ao celular fornecer o aspect ratio nativo (ex: 480x640 em retrato)
                 width: { ideal: 640 },
                 height: { ideal: 480 }
             },
@@ -16,14 +15,17 @@ export async function iniciarCamera(videoElement, canvasElement, statusElement) 
         videoElement.srcObject = stream;
 
         return new Promise((resolve) => {
-            videoElement.onloadedmetadata = () => {
-                // Sincroniza a resolução interna do canvas com a resolução real da câmera
+            videoElement.onloadedmetadata = async () => {
+                // Seta as propriedades nativas que o TensorFlow.js lê
+                videoElement.width = videoElement.videoWidth || 640;
+                videoElement.height = videoElement.videoHeight || 480;
+
                 if (canvasElement) {
-                    canvasElement.width = videoElement.videoWidth;
-                    canvasElement.height = videoElement.videoHeight;
+                    canvasElement.width = videoElement.width;
+                    canvasElement.height = videoElement.height;
                 }
                 
-                videoElement.play();
+                await videoElement.play();
                 resolve(videoElement);
             };
         });

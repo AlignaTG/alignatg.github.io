@@ -3,50 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contador de Piscadas & Monitor de Postura</title>
-    <link rel="stylesheet" href="./assets/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Aligna</title>
+    
+    <link rel="icon" type="image/svg+xml" href="assets/image/logo.svg">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Chart.js para o Modal de Histórico -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 </head>
 <body>
-    <h1>Detector de Piscadas & Postura</h1>
-    <p>Processamento local rodando 100% no seu navegador via GPU</p>
 
-    <div class="container">
-        <video id="webcam" width="640" height="480" autoplay playsinline muted></video>
-        <canvas id="output" width="640" height="480"></canvas>
+    <!-- Overlay de Carregamento -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-card">
+            <img src="assets/image/correctposturedark.jpg" alt="Postura Correta" class="loading-guide-img">
+            <div class="spinner"></div>
+            <p id="loadingText" class="loading-text">Iniciando câmera...</p>
+        </div>
     </div>
 
-    <!-- Controles de Postura, Calibração e Histórico -->
-    <div class="controls-container">
-        <button id="btn-calibrar" class="btn">Calibrar Distância Ideal (Foto)</button>
-        <button id="btn-historico" class="btn btn-secondary">Ver Histórico de Piscadas</button>
-        <div id="distancia-calibrada" class="info-badge">Distância base: Não definida</div>
-    </div>
+    <!-- Barra de Navegação Superior -->
+    <header class="navbar">
+        <div class="brand">
+            <img src="assets/image/logo.svg" alt="Aligna Logo" class="brand-logo">
+            <span class="brand-name">Aligna</span>
+        </div>
+        <div class="nav-badges">
+            <div class="privacy-badge">
+                <span class="pulse-dot"></span>
+                <span>Processamento 100% no seu navegador via GPU</span>
+            </div>
+        </div>
+    </header>
 
-    <div id="status-container">Carregando módulos de Visão Computacional...</div>
-    <div id="alerta-postura" class="alerta-postura hidden"></div>
-    <div id="ear-value" class="info-ear">EAR: -- | Distância: --</div>
+    <!-- Conteúdo Principal -->
+    <main class="main-container">
+        
+        <div class="hero-text">
+            <h1>Monitor de Postura & Fadiga Ocular</h1>
+            <!-- status-container mapeado no main.js -->
+            <p id="status-container" class="status-indicator">Iniciando...</p>
+        </div>
 
-    <!-- Modal para Exibição do Histórico / Gráfico -->
+        <!-- Câmera e Canvas (IDs webcam e output do seu JS) -->
+        <div class="camera-wrapper">
+            <div class="video-container">
+                <video id="webcam" width="640" height="480" autoplay muted playsinline></video>
+                <canvas id="output" width="640" height="480"></canvas>
+            </div>
+        </div>
+
+        <!-- Painel de Controles -->
+        <div class="controls-panel">
+            <button id="btn-calibrar" class="btn btn-primary">Calibrar Distância Ideal (Foto)</button>
+            <button id="btn-historico" class="btn btn-secondary">Ver Histórico de Piscadas</button>
+            <button id="btn-pip" class="btn btn-secondary" title="Manter câmera flutuando">Modo Flutuante (PiP)</button>
+            <div id="distancia-calibrada" class="badge-calibrada">Distância base: Não definida</div>
+        </div>
+
+        <!-- Telemetria em Tempo Real (Mapeado com seu ear-value) -->
+        <div class="telemetry-bar">
+            <span id="ear-value">EAR: -- | Distância: --</span>
+        </div>
+
+        <p class="app-version">v1.0.2</p>
+    </main>
+
+    <!-- Modal de Histórico de Piscadas (Chart.js) -->
     <div id="modal-historico" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Histórico de Piscadas por Minuto</h2>
-                <button id="btn-fechar-modal" class="btn-close">&times;</button>
+                <h3>Histórico de Piscadas (PPM)</h3>
+                <button id="btn-fechar-modal" class="modal-close" aria-label="Fechar">&times;</button>
             </div>
-            <div class="modal-body">
-                <canvas id="grafico-piscadas" width="600" height="300"></canvas>
-                <div id="historico-lista"></div>
+            <div class="chart-container">
+                <canvas id="grafico-piscadas"></canvas>
             </div>
         </div>
     </div>
-    
-    <footer class="app-version">
-        <span>v1.0.1</span>
-    </footer>
-    <!-- Container de Notificações / Pop-ups Flutuantes -->
-    <div id="toast-container" class="toast-container"></div>
-    <!-- Carrega a lógica e as bibliotecas do arquivo externo -->
-    <script type="module" src="./js/main.js"></script>
+
+    <!-- Script Principal como Módulo -->
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
