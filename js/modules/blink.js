@@ -2,8 +2,8 @@
 export const LIMITE_EAR_PADRAO = 0.21;
 export let limiteEarAtual = LIMITE_EAR_PADRAO;
 
-export const PISCADAS_MINIMAS_POR_MINUTO = 5;
-export const JANELA_TEMPO_MS = 20 * 1000; //
+export const PISCADAS_MINIMAS_POR_MINUTO = 6;
+export const JANELA_TEMPO_MS = 60 * 1000; //
 
 let contadorPiscadasJanela = 0;
 let olhoFechado = false;
