@@ -15,7 +15,7 @@ import {
     calcularDistanciaFace 
 } from './modules/geometry.js';
 import { calibrarDistancia, getDistanciaCalibrada, verificarAlertaPostura } from './modules/posture.js';
-import { processarCicloTempo, registrarPiscada, getHistoricoPiscadas } from './modules/blink.js';
+import { processarCicloTempo, registrarPiscada, getHistoricoPiscadas, setLimiteEar, getLimiteEar } from './modules/blink.js';
 import { tocarAudioRepeticoes } from './modules/audio.js';
 
 // ============================================================================
@@ -28,7 +28,6 @@ const statusDiv = document.getElementById('status-container');
 const earDiv = document.getElementById('ear-value');
 const btnCalibrar = document.getElementById('btn-calibrar');
 const distCalibradaDiv = document.getElementById('distancia-calibrada');
-const alertaPosturaDiv = document.getElementById('alerta-postura');
 
 // Elementos do Histórico / Modal
 const btnHistorico = document.getElementById('btn-historico');
@@ -36,12 +35,65 @@ const modalHistorico = document.getElementById('modal-historico');
 const btnFecharModal = document.getElementById('btn-fechar-modal');
 const canvasGrafico = document.getElementById('grafico-piscadas');
 
+// Container de Notificações Pop-up
+let toastContainer = document.getElementById('toast-container');
+if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer);
+}
+
 let detector;
-let alertaPosturaAudioTocado = false;
 let instanciaGrafico = null; // Guarda a instância do Chart.js
 
 // ============================================================================
-// FUNÇÃO PARA RENDERIZAR O GRÁFICO (Chart.js Responsivo e Estilizado)
+// GERENCIAMENTO DE POP-UPS (TOASTS)
+// ============================================================================
+function mostrarPopup(id, mensagem, tipo, duracaoAutoFechar = null) {
+    let toast = document.getElementById(id);
+
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = id;
+        toast.className = `toast ${tipo}`;
+        
+        const texto = document.createElement('span');
+        texto.className = 'toast-texto';
+        
+        const btnFechar = document.createElement('button');
+        btnFechar.className = 'toast-fechar';
+        btnFechar.innerHTML = '&times;';
+        btnFechar.onclick = () => fecharPopup(id);
+
+        toast.appendChild(texto);
+        toast.appendChild(btnFechar);
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => toast.classList.add('show'), 10);
+    }
+
+    const textoSpan = toast.querySelector('.toast-texto');
+    if (textoSpan && textoSpan.innerText !== mensagem) {
+        textoSpan.innerText = mensagem;
+    }
+
+    if (duracaoAutoFechar) {
+        if (toast.timerAutoFechar) clearTimeout(toast.timerAutoFechar);
+        toast.timerAutoFechar = setTimeout(() => fecharPopup(id), duracaoAutoFechar);
+    }
+}
+
+function fecharPopup(id) {
+    const toast = document.getElementById(id);
+    if (toast) {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }
+}
+
+// ============================================================================
+// FUNÇÃO PARA RENDERIZAR O GRÁFICO (Chart.js)
 // ============================================================================
 function renderizarGraficoPiscadas() {
     const historico = getHistoricoPiscadas();
@@ -58,7 +110,6 @@ function renderizarGraficoPiscadas() {
 
     const ctxGrafico = canvasGrafico.getContext('2d');
 
-    // Gradiente suave no preenchimento da curva
     const gradient = ctxGrafico.createLinearGradient(0, 0, 0, 220);
     gradient.addColorStop(0, 'rgba(76, 201, 240, 0.35)');
     gradient.addColorStop(1, 'rgba(76, 201, 240, 0.0)');
@@ -156,9 +207,15 @@ async function processarVideo() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const ciclo = processarCicloTempo();
 
-        // 🔊 Dispara o som 3 vezes no momento exato em que o alerta de piscadas é acionado
+        // 🔊 Dispara som e Pop-up de alerta de piscadas
         if (ciclo.novoAlertaDisparado) {
             tocarAudioRepeticoes('./assets/sounds/piscando.mp3', 3);
+            mostrarPopup(
+                'toast-piscada',
+                `⚠️ Atenção: Poucas piscadas no último minuto (${ciclo.piscadasUltimoMinuto} PPM)! Pisque mais.`,
+                'toast-piscada',
+                8000
+            );
         }
 
         if (faces && faces.length > 0) {
@@ -178,20 +235,32 @@ async function processarVideo() {
 
             const distanciaRostoAtual = calcularDistanciaFace(pEsqExterno, pDirExterno);
 
-            // Validação de Postura & Áudio
-            const alertaPosturaAtivo = verificarAlertaPostura(distanciaRostoAtual);
+            // Validação de Postura Progressiva, Áudio e Pop-up
+            const statusPostura = verificarAlertaPostura(distanciaRostoAtual);
             
-            if (alertaPosturaAtivo) {
-                alertaPosturaDiv.classList.remove('hidden');
-                alertaPosturaDiv.innerText = "🚨 ALERTA DE POSTURA: Você está muito perto da tela";
+            if (statusPostura.alertaAtivo) {
+                // 1. Mantém o toast lateral contando os segundos em tempo real
+                mostrarPopup(
+                    'toast-postura',
+                    `Muito perto da tela há ${statusPostura.segundosPerto}s! Afaste-se.`,
+                    'toast-postura'
+                );
 
-                if (!alertaPosturaAudioTocado) {
-                    tocarAudioRepeticoes('./assets/sounds/pertodatela.mp3', 1);
-                    alertaPosturaAudioTocado = true;
+                // 2. Quando atinge o marco (30s, 60s, 90s...), dispara o áudio e o pop-up grande central por 3 segundos
+                if (statusPostura.dispararAudio) {
+                    tocarAudioRepeticoes('./assets/sounds/pertodatela.mp3', statusPostura.repeticoesAudio);
+
+                    mostrarPopup(
+                        'toast-postura-grande',
+                        `ATENÇÃO: Muito perto da tela há ${statusPostura.segundosPerto}s! Corrija sua postura.`,
+                        'toast-postura-grande',
+                        3000 // Desaparece automaticamente após 3 segundos
+                    );
                 }
             } else {
-                alertaPosturaDiv.classList.add('hidden');
-                alertaPosturaAudioTocado = false;
+                // Usuário corrigiu a postura: fecha ambos os pop-ups
+                fecharPopup('toast-postura');
+                fecharPopup('toast-postura-grande');
             }
 
             // Cálculo do EAR e Detecção de Piscada
@@ -203,16 +272,18 @@ async function processarVideo() {
                 registrarPiscada(earMedio);
 
                 const basePixel = getDistanciaCalibrada();
+                const limiteEar = getLimiteEar();
                 const distTexto = basePixel 
                     ? `${distanciaRostoAtual.toFixed(0)}px (Base: ${basePixel.toFixed(0)}px)` 
                     : `${distanciaRostoAtual.toFixed(0)}px`;
-                earDiv.innerText = `EAR Médio: ${earMedio.toFixed(3)} | Distância: ${distTexto} | Ciclo: ${ciclo.tempoRestante}s`;
+                
+                earDiv.innerText = `EAR Médio: ${earMedio.toFixed(3)} (Limiar: ${limiteEar.toFixed(3)}) | Distância: ${distTexto} | Ciclo: ${ciclo.tempoRestante}s`;
             }
 
-            // Status e Alertas na Tela
+            // Status no Painel Principal
             if (ciclo.alertaAtivo) {
                 statusDiv.style.color = "#ff3333";
-                statusDiv.innerText = `⚠️ ALERTA: Poucas piscadas no último min (${ciclo.piscadasUltimoMinuto} PPM)! Pisque mais. | Atual: ${ciclo.piscadasMinutoAtual}`;
+                statusDiv.innerText = `⚠️ Poucas piscadas no último min (${ciclo.piscadasUltimoMinuto} PPM)! | Atual: ${ciclo.piscadasMinutoAtual}`;
             } else {
                 statusDiv.style.color = "#00ff88";
                 statusDiv.innerText = `Piscadas no min atual: ${ciclo.piscadasMinutoAtual} | Último min: ${ciclo.piscadasUltimoMinuto} PPM`;
@@ -221,8 +292,7 @@ async function processarVideo() {
             statusDiv.style.color = "#ffffff";
             statusDiv.innerText = "Posicione seu rosto em frente à câmera";
             earDiv.innerText = "EAR: -- | Distância: --";
-            alertaPosturaDiv.classList.add('hidden');
-            alertaPosturaAudioTocado = false;
+            fecharPopup('toast-postura');
         }
     }
 
@@ -255,7 +325,7 @@ window.addEventListener('click', (e) => {
     }
 });
 
-// Calibração de Distância
+// Calibração Conjunta (Distância de Referência + Limiar de EAR Dinâmico)
 btnCalibrar.addEventListener('click', async () => {
     if (!detector) return;
 
@@ -265,12 +335,28 @@ btnCalibrar.addEventListener('click', async () => {
         const pEsq = pontos[INDEX_OLHO_EXTERNO_ESQ];
         const pDir = pontos[INDEX_OLHO_EXTERNO_DIR];
 
+        // 1. Calibra Distância
         const distancia = calcularDistanciaFace(pEsq, pDir);
         calibrarDistancia(distancia);
 
-        distCalibradaDiv.innerText = `Distância base: ${distancia.toFixed(0)} px`;
+        // 2. Calibra EAR (Limiar definido como 68% da abertura atual dos olhos)
+        const pE = INDICES_OLHO_ESQUERDO.map(i => pontos[i]);
+        const pD = INDICES_OLHO_DIREITO.map(i => pontos[i]);
+        const earEsq = calcularEAR(pE[0], pE[1], pE[2], pE[3], pE[4], pE[5]);
+        const earDir = calcularEAR(pD[0], pD[1], pD[2], pD[3], pD[4], pD[5]);
+        const earMedio = (earEsq + earDir) / 2;
+        const novoLimiteEar = earMedio * 0.68;
+        setLimiteEar(novoLimiteEar);
+
+        // Atualização da UI
+        distCalibradaDiv.innerText = `Base: ${distancia.toFixed(0)}px | EAR: ${novoLimiteEar.toFixed(3)}`;
         distCalibradaDiv.style.backgroundColor = "#1b4d3e";
         distCalibradaDiv.style.color = "#00ff88";
+
+        btnCalibrar.innerText = "✓ Calibrado!";
+        setTimeout(() => {
+            btnCalibrar.innerText = "Calibrar Distância Ideal (Foto)";
+        }, 1500);
     } else {
         alert("Rosto não detectado! Posicione-se bem em frente à câmera para calibrar.");
     }

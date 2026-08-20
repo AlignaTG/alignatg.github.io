@@ -1,22 +1,25 @@
 /* ==========================================================================
-   ESTILOS GERAIS E ESTRUTURA
+   ESTILOS GERAIS E ESTRUTURA (TEMA DARK GEMINI)
    ========================================================================== */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     text-align: center;
-    background: #0b132b;
-    color: #e0e6ed;
+    background: #131314;
+    color: #e3e3e3;
     margin: 0;
     padding: 20px;
 }
 
 h1 {
-    color: #4cc9f0;
-    margin-bottom: 5px;
+    color: #e3e3e3;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 6px;
 }
 
 p {
-    color: #8d99ae;
+    color: #c4c7c5;
+    font-size: 14px;
     margin-top: 0;
 }
 
@@ -28,24 +31,22 @@ p {
     width: 100%;
     max-width: 640px;
     margin: 20px auto;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 15px rgba(76, 201, 240, 0.1);
-    background: #1c2541;
-    border: 1px solid #2a3a5e;
-    /* Aplica o espelhamento diretamente no container pai */
-    transform: scaleX(-1);
+    border-radius: 20px;
+    overflow: hidden; /* Corta o excesso do zoom internamente */
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+    background: #1e1f20;
+    border: 1px solid #3c4043;
+    transform: scaleX(-1); /* Espelha tudo junto */
 }
 
-/* Espelhamento e sobreposição idêntica no vídeo e canvas */
 #webcam {
     display: block;
     width: 100%;
     height: auto;
-    opacity: 0.4;
+    opacity: 0.55;
+    transition: transform 0.2s ease;
 }
 
-/* O canvas sobrepõe exatamente o espaço ocupado pelo vídeo */
 #output {
     position: absolute;
     top: 0;
@@ -53,31 +54,33 @@ p {
     width: 100%;
     height: 100%;
     pointer-events: none;
+    transition: transform 0.2s ease;
 }
 
 /* ==========================================================================
    MÉTRICAS E STATUS
    ========================================================================== */
 #status-container {
-    font-size: 28px;
-    font-weight: bold;
-    margin-top: 15px;
-    color: #4cc9f0;
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 18px;
+    color: #a8c7fa;
 }
 
 .info-ear {
     font-size: 14px;
-    color: #8d99ae;
-    margin-top: 5px;
+    color: #8e918f;
+    margin-top: 6px;
+    font-family: monospace;
 }
 
 .info-badge {
-    padding: 8px 12px;
-    background-color: #1c2541;
-    color: #a5b4fc;
-    border: 1px solid #2a3a5e;
-    border-radius: 6px;
-    font-size: 14px;
+    padding: 8px 14px;
+    background-color: #1e1f20;
+    color: #c4c7c5;
+    border: 1px solid #3c4043;
+    border-radius: 8px;
+    font-size: 13px;
     font-family: monospace;
 }
 
@@ -88,43 +91,40 @@ p {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
-    margin: 15px 0;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 18px 0;
 }
 
 .btn {
-    background-color: #3a86ff;
-    color: white;
+    background-color: #a8c7fa;
+    color: #041e49;
     border: none;
-    padding: 10px 20px;
+    padding: 10px 22px;
     font-size: 14px;
-    font-weight: bold;
-    border-radius: 6px;
+    font-weight: 600;
+    border-radius: 100px;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
 }
 
 .btn:hover {
-    background-color: #2563eb;
+    background-color: #d3e3fd;
 }
 
 .btn:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
 }
 
-/* Botão com ícone (Histórico) */
-.btn-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background-color: #1c2541;
-    border: 1px solid #3a86ff;
-    color: #e0e6ed;
+/* Botão Secundário (Histórico) */
+.btn-secondary, .btn-icon {
+    background-color: #1e1f20;
+    border: 1px solid #444746;
+    color: #e3e3e3;
 }
 
-.btn-icon:hover {
-    background-color: #2a3a5e;
+.btn-secondary:hover, .btn-icon:hover {
+    background-color: #282a2c;
 }
 
 .icon-img {
@@ -135,28 +135,23 @@ p {
 }
 
 /* ==========================================================================
-   ALERTAS
+   ALERTAS IN-LINE (SE USADO)
    ========================================================================== */
 .alerta-postura {
-    margin: 10px auto;
+    margin: 12px auto;
     max-width: 640px;
-    background-color: #e63946;
-    color: white;
+    background-color: #2d1517;
+    color: #f28b82;
+    border: 1px solid #ea4335;
     padding: 12px;
-    border-radius: 6px;
-    font-weight: bold;
+    border-radius: 12px;
+    font-weight: 600;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
-    animation: pulse 1s infinite alternate;
+    box-shadow: 0 4px 16px rgba(234, 67, 53, 0.2);
 }
 
 .hidden {
     display: none !important;
-}
-
-@keyframes pulse {
-    from { opacity: 0.85; transform: scale(0.99); }
-    to { opacity: 1; transform: scale(1); }
 }
 
 /* ==========================================================================
@@ -168,53 +163,53 @@ p {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(11, 19, 43, 0.85);
+    background-color: rgba(0, 0, 0, 0.75);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
 }
 
 .modal-content {
-    background-color: #1c2541;
-    color: #e0e6ed;
-    border-radius: 16px;
-    padding: 20px;
+    background-color: #1e1f20;
+    color: #e3e3e3;
+    border-radius: 24px;
+    padding: 24px;
     width: 90%;
     max-width: 580px;
     box-sizing: border-box;
-    border: 1px solid #2a3a5e;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    border: 1px solid #3c4043;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8);
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #2a3a5e;
+    border-bottom: 1px solid #3c4043;
     padding-bottom: 12px;
     margin-bottom: 15px;
 }
 
 .modal-header h2 {
     margin: 0;
-    font-size: 20px;
-    color: #4cc9f0;
+    font-size: 18px;
+    color: #e3e3e3;
 }
 
 .btn-close {
     background: none;
     border: none;
     font-size: 1.8rem;
-    color: #8d99ae;
+    color: #8e918f;
     cursor: pointer;
     line-height: 1;
     transition: color 0.2s;
 }
 
 .btn-close:hover {
-    color: #e63946;
+    color: #f28b82;
 }
 
 .modal-body {
@@ -223,17 +218,124 @@ p {
     height: 260px;
 }
 
-/* Canvas do Chart.js: Garante que fique desespelhado e relativo ao modal */
 #grafico-piscadas {
     width: 100% !important;
     height: 100% !important;
 }
 
 .app-version {
-    margin-top: 30px;
+    margin-top: 35px;
     padding-bottom: 10px;
     font-size: 12px;
-    color: #4b5563; /* cinza discreto */
+    color: #5e5e5e;
     letter-spacing: 0.5px;
     font-family: monospace;
+}
+
+/* ==========================================================================
+   SISTEMA DE POP-UPS / TOAST NOTIFICATIONS (ESTILO GEMINI)
+   ========================================================================== */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 380px;
+    width: calc(100% - 40px);
+    pointer-events: none;
+}
+
+.toast {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #e3e3e3;
+    background: #1e1f20;
+    border: 1px solid #3c4043;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transform: translateY(-15px) scale(0.96);
+    transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Notificação lateral de postura */
+.toast-postura {
+    background: #251a1b;
+    border: 1px solid #ea4335;
+    color: #f28b82;
+}
+
+/* Notificação lateral de piscadas */
+.toast-piscada {
+    background: #1e222a;
+    border: 1px solid #7cacf8;
+    color: #a8c7fa;
+}
+
+.toast-fechar {
+    background: none;
+    border: none;
+    color: #8e918f;
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: 12px;
+    line-height: 1;
+}
+
+.toast-fechar:hover {
+    color: #e3e3e3;
+}
+
+/* ==========================================================================
+   POP-UP GRANDE CENTRALIZADO (ESTILO GEMINI DARK)
+   ========================================================================== */
+.toast-postura-grande {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(30, 31, 32, 0.96);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid #ea4335;
+    box-shadow: 0 0 35px rgba(234, 67, 53, 0.35), 0 20px 50px rgba(0, 0, 0, 0.9);
+    color: #fce8e6;
+    font-size: 22px;
+    font-weight: 600;
+    padding: 24px 36px;
+    border-radius: 24px;
+    z-index: 10000;
+    max-width: 90%;
+    width: auto;
+    text-align: center;
+    pointer-events: auto;
+    opacity: 0;
+    transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s ease;
+}
+
+.toast-postura-grande.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.toast-postura-grande .toast-fechar {
+    font-size: 26px;
+    margin-left: 20px;
+    color: #8e918f;
+}
+
+.toast-postura-grande .toast-fechar:hover {
+    color: #f28b82;
 }

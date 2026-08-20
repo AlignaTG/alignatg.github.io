@@ -1,5 +1,8 @@
-export const LIMITE_EAR = 0.2;
-export const PISCADAS_MINIMAS_POR_MINUTO = 10;
+// Limiar padrão inicial caso não seja feita calibração
+export const LIMITE_EAR_PADRAO = 0.21;
+export let limiteEarAtual = LIMITE_EAR_PADRAO;
+
+export const PISCADAS_MINIMAS_POR_MINUTO = 5;
 export const JANELA_TEMPO_MS = 60000;
 
 let contadorPiscadasJanela = 0;
@@ -10,6 +13,24 @@ let alertaPiscadaAtivo = false;
 
 // Array para armazenar o histórico de cada ciclo de 1 minuto
 const historicoPiscadas = [];
+
+/**
+ * Atualiza o limite de EAR dinamicamente (chamado na calibração)
+ * @param {number} novoLimite 
+ */
+export function setLimiteEar(novoLimite) {
+    if (typeof novoLimite === 'number' && !isNaN(novoLimite) && novoLimite > 0) {
+        limiteEarAtual = novoLimite;
+    }
+}
+
+/**
+ * Retorna o limite de EAR em vigor
+ * @returns {number}
+ */
+export function getLimiteEar() {
+    return limiteEarAtual;
+}
 
 /**
  * Processa a janela de tempo e salva o histórico a cada minuto finalizado
@@ -55,12 +76,12 @@ export function processarCicloTempo() {
 }
 
 /**
- * Registra a transição de olho aberto/fechado com base no EAR
+ * Registra a transição de olho aberto/fechado com base no limite calibrado
  */
 export function registrarPiscada(earMedio) {
     if (typeof earMedio !== 'number' || isNaN(earMedio)) return;
 
-    if (earMedio < LIMITE_EAR) {
+    if (earMedio < limiteEarAtual) {
         olhoFechado = true;
     } else {
         if (olhoFechado) {
@@ -72,14 +93,13 @@ export function registrarPiscada(earMedio) {
 
 /**
  * Retorna uma cópia de todos os registros históricos acumulados
- * @returns {Array<{timestamp: string, horarioFormatado: string, minutoIndice: number, piscadas: number, metaMinima: number, abaixoDaMeta: boolean}>}
  */
 export function getHistoricoPiscadas() {
     return [...historicoPiscadas];
 }
 
 /**
- * Limpa o histórico de registros (ex: ao reiniciar sessão)
+ * Limpa o histórico de registros
  */
 export function limparHistoricoPiscadas() {
     historicoPiscadas.length = 0;

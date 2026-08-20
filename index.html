@@ -19,7 +19,7 @@
     <!-- Controles de Postura, Calibração e Histórico -->
     <div class="controls-container">
         <button id="btn-calibrar" class="btn">Calibrar Distância Ideal (Foto)</button>
-        <button id="btn-historico" class="btn btn-secondary">📊 Ver Histórico de Piscadas</button>
+        <button id="btn-historico" class="btn btn-secondary">Ver Histórico de Piscadas</button>
         <div id="distancia-calibrada" class="info-badge">Distância base: Não definida</div>
     </div>
 
@@ -40,9 +40,12 @@
             </div>
         </div>
     </div>
+    
     <footer class="app-version">
-        <span>v1.0.0</span>
+        <span>v1.0.1</span>
     </footer>
+    <!-- Container de Notificações / Pop-ups Flutuantes -->
+    <div id="toast-container" class="toast-container"></div>
     <!-- Carrega a lógica e as bibliotecas do arquivo externo -->
     <script type="module" src="./js/main.js"></script>
 </body>
