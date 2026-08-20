@@ -445,3 +445,141 @@ body {
     margin-right: 4px;
     display: inline-block;
 }
+
+/* ==========================================================================
+   Responsividade Mobile (Smartphones e Telas Pequenas)
+   ========================================================================== */
+@media (max-width: 600px) {
+    body {
+        /* Compensa entalhe/Dynamic Island em aparelhos modernos */
+        padding-top: env(safe-area-inset-top, 12px);
+    }
+
+    /* Topo / Navbar: Organiza logo e badge verticalmente sem encavalar */
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px 16px;
+        align-items: center;
+    }
+
+    .privacy-badge {
+        font-size: 0.72rem;
+        padding: 4px 10px;
+        text-align: center;
+    }
+
+    .hero-text h1 {
+        font-size: 1.15rem;
+    }
+
+    .status-indicator {
+        font-size: 0.85rem;
+    }
+
+    /* Container de Vídeo: Ajusta para caber perfeitamente na largura da tela */
+    .camera-wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .video-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3; /* Mantém proporção nativa da webcam sem esticar */
+    }
+
+    /* Controles: Botões em largura total e alinhados */
+    .controls-panel {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .controls-panel .btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    .badge-calibrada {
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    /* Barra de Telemetria */
+    .telemetry-bar {
+        width: 100%;
+        font-size: 0.75rem;
+        text-align: center;
+        box-sizing: border-box;
+        line-height: 1.4;
+    }
+
+    /* Toasts no celular: fixados no topo ou base ocupando a largura útil */
+    .toast-container {
+        right: 12px;
+        left: 12px;
+        bottom: 16px;
+    }
+
+    .toast {
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 0.8rem;
+    }
+
+    #toast-postura-grande {
+        width: 90%;
+        font-size: 1rem;
+        padding: 16px;
+    }
+}
+
+/* ==========================================================================
+   Footer Elegante
+   ========================================================================== */
+.app-footer {
+    width: 100%;
+    margin-top: auto;
+    padding: 24px 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: #7d8590;
+}
+
+.footer-copy a {
+    color: #00ff88;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.footer-copy a:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+}
+
+.footer-dot {
+    color: #30363d;
+    margin: 0 4px;
+}
+
+.footer-badge {
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}
