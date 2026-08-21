@@ -3,68 +3,76 @@ export const LIMITE_EAR_PADRAO = 0.21;
 export let limiteEarAtual = LIMITE_EAR_PADRAO;
 
 export const PISCADAS_MINIMAS_POR_MINUTO = 6;
-export const JANELA_TEMPO_MS = 60 * 1000; //
+export const JANELA_TEMPO_MS = 60 * 1000;
 
 let contadorPiscadasJanela = 0;
 let olhoFechado = false;
-let tempoInicioJanela = Date.now();
 let piscadasUltimoMinuto = 0;
 let alertaPiscadaAtivo = false;
+let tempoDecorridoAcumulado = 0;
+let ultimoTimestampPresente = null;
 
-// Array para armazenar o histórico de cada ciclo de 1 minuto
 const historicoPiscadas = [];
 
-/**
- * Atualiza o limite de EAR dinamicamente (chamado na calibração)
- * @param {number} novoLimite 
- */
 export function setLimiteEar(novoLimite) {
     if (typeof novoLimite === 'number' && !isNaN(novoLimite) && novoLimite > 0) {
         limiteEarAtual = novoLimite;
     }
 }
 
-/**
- * Retorna o limite de EAR em vigor
- * @returns {number}
- */
 export function getLimiteEar() {
     return limiteEarAtual;
 }
 
 /**
- * Processa a janela de tempo e salva o histórico a cada minuto finalizado
+ * Processa a janela de tempo e reinicia do zero ao detectar retorno do usuário
+ * @param {boolean} usuarioPresente 
  */
-export function processarCicloTempo() {
+export function processarCicloTempo(usuarioPresente = false) {
     const agora = Date.now();
-    const tempoDecorrido = agora - tempoInicioJanela;
-    const tempoRestanteSegundos = Math.max(0, Math.ceil((JANELA_TEMPO_MS - tempoDecorrido) / 1000));
-    
     let novoAlertaDisparado = false;
 
-    // Quando fecha o ciclo de 1 minuto
-    if (tempoDecorrido >= JANELA_TEMPO_MS) {
-        piscadasUltimoMinuto = contadorPiscadasJanela;
-        alertaPiscadaAtivo = piscadasUltimoMinuto < PISCADAS_MINIMAS_POR_MINUTO;
-        
-        // 📊 Registra o minuto encerrado no histórico
-        historicoPiscadas.push({
-            timestamp: new Date().toISOString(),
-            horarioFormatado: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            minutoIndice: historicoPiscadas.length + 1,
-            piscadas: piscadasUltimoMinuto,
-            metaMinima: PISCADAS_MINIMAS_POR_MINUTO,
-            abaixoDaMeta: alertaPiscadaAtivo
-        });
-
-        // Se ativou o alerta neste ciclo, sinaliza para tocar o som
-        if (alertaPiscadaAtivo) {
-            novoAlertaDisparado = true;
+    if (usuarioPresente) {
+        // Se a pessoa acabou de voltar (estava ausente), reseta tudo para o início
+        if (ultimoTimestampPresente === null) {
+            tempoDecorridoAcumulado = 0;
+            contadorPiscadasJanela = 0;
+            ultimoTimestampPresente = agora;
+        } else {
+            const delta = agora - ultimoTimestampPresente;
+            tempoDecorridoAcumulado += delta;
+            ultimoTimestampPresente = agora;
         }
 
+        // Quando atinge os 60 segundos completos de presença contínua
+        if (tempoDecorridoAcumulado >= JANELA_TEMPO_MS) {
+            piscadasUltimoMinuto = contadorPiscadasJanela;
+            alertaPiscadaAtivo = piscadasUltimoMinuto < PISCADAS_MINIMAS_POR_MINUTO;
+
+            historicoPiscadas.push({
+                timestamp: new Date().toISOString(),
+                horarioFormatado: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                minutoIndice: historicoPiscadas.length + 1,
+                piscadas: piscadasUltimoMinuto,
+                metaMinima: PISCADAS_MINIMAS_POR_MINUTO,
+                abaixoDaMeta: alertaPiscadaAtivo
+            });
+
+            if (alertaPiscadaAtivo) {
+                novoAlertaDisparado = true;
+            }
+
+            contadorPiscadasJanela = 0;
+            tempoDecorridoAcumulado = 0;
+        }
+    } else {
+        // Usuário ausente: limpa o timestamp e zera o progresso acumulado
+        ultimoTimestampPresente = null;
+        tempoDecorridoAcumulado = 0;
         contadorPiscadasJanela = 0;
-        tempoInicioJanela = Date.now();
     }
+
+    const tempoRestanteSegundos = Math.max(0, Math.ceil((JANELA_TEMPO_MS - tempoDecorridoAcumulado) / 1000));
 
     return {
         tempoRestante: tempoRestanteSegundos,
@@ -75,9 +83,6 @@ export function processarCicloTempo() {
     };
 }
 
-/**
- * Registra a transição de olho aberto/fechado com base no limite calibrado
- */
 export function registrarPiscada(earMedio) {
     if (typeof earMedio !== 'number' || isNaN(earMedio)) return;
 
@@ -91,16 +96,10 @@ export function registrarPiscada(earMedio) {
     }
 }
 
-/**
- * Retorna uma cópia de todos os registros históricos acumulados
- */
 export function getHistoricoPiscadas() {
     return [...historicoPiscadas];
 }
 
-/**
- * Limpa o histórico de registros
- */
 export function limparHistoricoPiscadas() {
     historicoPiscadas.length = 0;
 }

@@ -98,7 +98,6 @@ async function executarCalibracao() {
 // ============================================================================
 async function processarVideo() {
     if (video && video.readyState >= 2 && ctx) {
-        // Sincroniza a resolução interna real do sensor com o canvas
         if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -106,27 +105,14 @@ async function processarVideo() {
 
         const faces = await detector.estimateFaces(video, { flipHorizontal: false });
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const ciclo = processarCicloTempo();
 
-        // Alerta de fadiga ocular / poucas piscadas
-        if (ciclo.novoAlertaDisparado) {
-            tocarAudioRepeticoes('./assets/sounds/piscando.mp3', 3);
-            dispararNotificacaoNativa(
-                "Aligna — Poucas Piscadas!",
-                `Detectadas apenas ${ciclo.piscadasUltimoMinuto} PPM. Lembre-se de piscar!`
-            );
-            mostrarPopup(
-                'toast-piscada',
-                `<img src="assets/image/attention.svg" class="toast-svg-icon" alt="Alerta"> Atenção: Poucas piscadas no último minuto (${ciclo.piscadasUltimoMinuto} PPM)! Pisque mais.`,
-                'toast-piscada',
-                8000
-            );
-        }
+        const temRosto = faces && faces.length > 0;
+        const ciclo = processarCicloTempo(temRosto);
 
-        if (faces && faces.length > 0) {
+        if (temRosto) {
             const pontos = faces[0].keypoints;
 
-            // Renderiza os pontos da malha se não estiver no modo PiP
+            // Renderiza malha facial se não estiver em PiP
             if (!document.pictureInPictureElement) {
                 ctx.fillStyle = '#00ff88';
                 pontos.forEach(ponto => {
@@ -134,12 +120,12 @@ async function processarVideo() {
                 });
             }
 
-            // Análise de Postura / Distância
+            // 1. Análise de Postura / Distância
             const pEsqExterno = pontos[INDEX_OLHO_EXTERNO_ESQ];
             const pDirExterno = pontos[INDEX_OLHO_EXTERNO_DIR];
             const distanciaRostoAtual = calcularDistanciaFace(pEsqExterno, pDirExterno);
             const statusPostura = verificarAlertaPostura(distanciaRostoAtual);
-            
+
             if (statusPostura.alertaAtivo) {
                 mostrarPopup(
                     'toast-postura',
@@ -166,7 +152,7 @@ async function processarVideo() {
                 fecharPopup('toast-postura-grande');
             }
 
-            // Análise do EAR e Detecção de Piscadas
+            // 2. Análise do EAR e Detecção de Piscadas
             const pE = INDICES_OLHO_ESQUERDO.map(i => pontos[i]);
             const pD = INDICES_OLHO_DIREITO.map(i => pontos[i]);
 
@@ -188,6 +174,21 @@ async function processarVideo() {
                 }
             }
 
+            // 3. Alerta de Fadiga Ocular / Poucas Piscadas
+            if (ciclo.novoAlertaDisparado) {
+                tocarAudioRepeticoes('./assets/sounds/piscando.mp3', 3);
+                dispararNotificacaoNativa(
+                    "Aligna — Poucas Piscadas!",
+                    `Detectadas apenas ${ciclo.piscadasUltimoMinuto} PPM. Lembre-se de piscar!`
+                );
+                mostrarPopup(
+                    'toast-piscada',
+                    `<img src="assets/image/attention.svg" class="toast-svg-icon" alt="Alerta"> Atenção: Poucas piscadas no último minuto (${ciclo.piscadasUltimoMinuto} PPM)! Pisque mais.`,
+                    'toast-piscada',
+                    8000
+                );
+            }
+
             if (statusDiv) {
                 if (ciclo.alertaAtivo) {
                     statusDiv.style.color = "#ff3333";
@@ -197,13 +198,20 @@ async function processarVideo() {
                     statusDiv.innerText = `Piscadas no min atual: ${ciclo.piscadasMinutoAtual} | Último min: ${ciclo.piscadasUltimoMinuto} PPM`;
                 }
             }
+
         } else {
-            if (statusDiv) {
-                statusDiv.style.color = "#ffffff";
-                statusDiv.innerText = "Posicione seu rosto em frente à câmera";
-            }
-            if (earDiv) earDiv.innerText = "EAR: -- | Distância: --";
+            // 4. Usuário Ausente: Reseta avisos e aguarda
+            verificarAlertaPostura(0);
             fecharPopup('toast-postura');
+            fecharPopup('toast-postura-grande');
+
+            if (statusDiv) {
+                statusDiv.style.color = "#94a3b8";
+                statusDiv.innerText = "Ausente — Aguardando usuário...";
+            }
+            if (earDiv) {
+                earDiv.innerText = "Ciclo: 60s | Piscadas: 0 | Aguardando detecção facial";
+            }
         }
     }
 
