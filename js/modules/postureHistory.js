@@ -1,37 +1,74 @@
-const CHAVE_STORAGE = 'aligna_historico_postura';
+/**
+ * Módulo de Gerenciamento do Histórico de Avisos de Postura
+ * (Mantido apenas em memória - reseta automaticamente ao recarregar a página)
+ */
 
-export function registrarAvisoPostura(duracaoSegundos = 30) {
+// Array em memória volátil (limpo a cada reload/F5)
+const historicoAvisos = [];
+
+/**
+ * Registra um novo alerta de proximidade
+ * @param {number} segundosPerto
+ */
+export function registrarAvisoPostura(segundosPerto) {
     const agora = new Date();
-    const horarioFormatado = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const dataFormatada = agora.toLocaleDateString('pt-BR');
+    const horarioFormatado = agora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-    const novoRegistro = {
+    historicoAvisos.unshift({
         id: Date.now(),
         horario: horarioFormatado,
-        data: dataFormatada,
-        duracao: duracaoSegundos,
-        mensagem: `Aviso de proximidade contínua (${duracaoSegundos}s)`
-    };
+        duracao: segundosPerto
+    });
 
-    const historico = getHistoricoAvisos();
-    historico.unshift(novoRegistro); // Adiciona o mais recente no topo
-
-    // Guarda até 50 eventos para não sobrecarregar
-    if (historico.length > 50) historico.pop();
-
-    localStorage.setItem(CHAVE_STORAGE, JSON.stringify(historico));
-    return novoRegistro;
+    renderizarListaAvisos();
 }
 
+/**
+ * Retorna todos os avisos da sessão atual
+ */
 export function getHistoricoAvisos() {
-    try {
-        const dados = localStorage.getItem(CHAVE_STORAGE);
-        return dados ? JSON.parse(dados) : [];
-    } catch {
-        return [];
-    }
+    return [...historicoAvisos];
 }
 
+/**
+ * Limpa o histórico manualmente
+ */
 export function limparHistoricoAvisos() {
-    localStorage.removeItem(CHAVE_STORAGE);
+    historicoAvisos.length = 0;
+    renderizarListaAvisos();
+}
+
+/**
+ * Atualiza a interface da lista dentro do modal
+ */
+export function renderizarListaAvisos() {
+    const listaElement = document.getElementById('lista-avisos-postura');
+    if (!listaElement) return;
+
+    listaElement.innerHTML = '';
+
+    if (historicoAvisos.length === 0) {
+        listaElement.innerHTML = `
+            <li style="text-align: center; color: var(--text-muted, #64748b); padding: 16px; font-size: 0.85rem;">
+                Nenhum aviso de proximidade registrado nesta sessão.
+            </li>
+        `;
+        return;
+    }
+
+    historicoAvisos.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'aviso-item';
+        li.innerHTML = `
+            <span class="aviso-hora">${item.horario}</span>
+            <span class="aviso-desc">Muito perto por ${item.duracao}s</span>
+        `;
+        listaElement.appendChild(li);
+    });
+}
+
+// Botão de limpar histórico do modal
+const btnLimpar = document.getElementById('btn-limpar-avisos');
+if (btnLimpar) {
+    btnLimpar.addEventListener('click', limparHistoricoAvisos);
 }
