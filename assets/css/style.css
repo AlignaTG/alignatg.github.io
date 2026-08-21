@@ -741,4 +741,31 @@ body {
         width: 100%;
         font-size: 0.8rem;
     }
+
+    .camera-wrapper {
+        width: 100%;
+        max-width: 330px;
+        margin-bottom: 12px;
+    }
+
+    .video-container {
+        width: 100%;
+        height: auto;
+        /* Remove a trava rígida de 4/3 no mobile para aceitar a orientação natural do sensor */
+        aspect-ratio: auto; 
+        min-height: 250px;
+        max-height: 38vh;
+    }
+
+    /* Garante alinhamento 1:1 de pixel entre a imagem do vídeo e a malha do canvas */
+    #webcam,
+    #output {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: fill; /* 📍 Elimina o achatamento dos pontos no celular */
+        transform: scaleX(-1);
+    }
 }
