@@ -98,6 +98,7 @@ async function executarCalibracao() {
 // ============================================================================
 async function processarVideo() {
     if (video && video.readyState >= 2 && ctx) {
+        // Sincroniza a resolução interna real do sensor com o canvas
         if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
