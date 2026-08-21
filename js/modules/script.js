@@ -6,6 +6,7 @@ import 'https://esm.sh/@tensorflow/tfjs-converter@4.20.0';
 import 'https://esm.sh/@tensorflow/tfjs-backend-webgl@4.20.0';
 import * as faceLandmarksDetection from 'https://esm.sh/@tensorflow-models/face-landmarks-detection@1.0.5';
 
+
 // ============================================================================
 // 2. CONFIGURAÇÕES E MAPEAMENTO DO DOM
 // ============================================================================

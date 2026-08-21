@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aligna</title>
-    
+
     <link rel="icon" type="image/svg+xml" href="assets/image/logo.svg">
     <link rel="stylesheet" href="assets/css/style.css">
-    
-    <!-- Chart.js para o Modal de Histórico -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 </head>
+
 <body>
 
     <!-- Overlay de Carregamento -->
@@ -28,24 +29,68 @@
             <img src="assets/image/logo.svg" alt="Aligna Logo" class="brand-logo">
             <span class="brand-name">Aligna</span>
         </div>
-        <div class="nav-badges">
+
+        <div class="nav-actions">
             <div class="privacy-badge">
                 <span class="pulse-dot"></span>
                 <span>Processamento 100% no seu navegador via GPU</span>
             </div>
+            <!-- Botão Menu Hamburguer para Abrir Sidebar -->
+            <button id="btn-abrir-sidebar" class="btn-menu" aria-label="Abrir Menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
         </div>
     </header>
 
+    <!-- Sidebar Lateral e Backdrop -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu de Ferramentas</h3>
+            <button id="btn-fechar-sidebar" class="sidebar-close">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <!-- Botão Recalibrar que surge aqui após a 1ª calibração -->
+            <div id="sidebar-calibrar-container" class="sidebar-item-container hidden">
+                <button id="btn-sidebar-calibrar" class="btn-sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                        <circle cx="12" cy="13" r="4" />
+                    </svg>
+                    Recalibrar Distância
+                </button>
+            </div>
+
+            <button id="btn-historico" class="btn-sidebar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18" />
+                    <path d="m19 9-5 5-4-4-3 3" />
+                </svg>
+                Ver Históricos
+            </button>
+
+            <button id="btn-pip" class="btn-sidebar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <rect x="12" y="9" width="8" height="6" rx="1" />
+                </svg>
+                Modo Flutuante (PiP)
+            </button>
+        </div>
+    </aside>
+
     <!-- Conteúdo Principal -->
     <main class="main-container">
-        
         <div class="hero-text">
             <h1>Monitor de Postura & Fadiga Ocular</h1>
-            <!-- status-container mapeado no main.js -->
             <p id="status-container" class="status-indicator">Iniciando...</p>
         </div>
 
-        <!-- Câmera e Canvas (IDs webcam e output do seu JS) -->
+        <!-- Câmera e Canvas -->
         <div class="camera-wrapper">
             <div class="video-container">
                 <video id="webcam" width="640" height="480" autoplay muted playsinline></video>
@@ -53,43 +98,60 @@
             </div>
         </div>
 
-        <!-- Painel de Controles -->
+        <!-- Painel Central de Calibração -->
         <div class="controls-panel">
             <button id="btn-calibrar" class="btn btn-primary">Calibrar Distância Ideal (Foto)</button>
-            <button id="btn-historico" class="btn btn-secondary">Ver Histórico de Piscadas</button>
-            <button id="btn-pip" class="btn btn-secondary" title="Manter câmera flutuando">Modo Flutuante (PiP)</button>
             <div id="distancia-calibrada" class="badge-calibrada">Distância base: Não definida</div>
         </div>
 
-        <!-- Telemetria em Tempo Real (Mapeado com seu ear-value) -->
+        <!-- Telemetria em Tempo Real -->
         <div class="telemetry-bar">
             <span id="ear-value">EAR: -- | Distância: --</span>
         </div>
     </main>
 
+    <!-- Rodapé -->
     <footer class="app-footer">
-    <p class="footer-copy">
-        &copy; 2026 João Latczuk • Código aberto sob licença 
-        <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">MIT</a>
-    </p>
-    <span class="footer-separator">•</span>
-    <p class="footer-version"> v1.0.4</p>
+        <p class="footer-copy">
+            &copy; 2026 João Latczuk • Código aberto sob licença
+            <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">MIT</a>
+            <span class="footer-separator">•</span>
+            <span class="footer-version">v1.0.5</span>
+        </p>
     </footer>
 
-    <!-- Modal de Histórico de Piscadas (Chart.js) -->
+    <!-- Modal de Histórico de Piscadas -->
     <div id="modal-historico" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Histórico de Piscadas (PPM)</h3>
+                <div class="modal-tabs">
+                    <button id="tab-btn-piscadas" class="tab-btn active">Piscadas (PPM)</button>
+                    <button id="tab-btn-postura" class="tab-btn">Avisos de Postura</button>
+                </div>
                 <button id="btn-fechar-modal" class="modal-close" aria-label="Fechar">&times;</button>
             </div>
-            <div class="chart-container">
-                <canvas id="grafico-piscadas"></canvas>
+
+            <!-- Aba 1: Gráfico -->
+            <div id="tab-conteudo-piscadas" class="tab-pane active">
+                <div class="chart-container">
+                    <canvas id="grafico-piscadas"></canvas>
+                </div>
+            </div>
+
+            <!-- Aba 2: Lista de Avisos de 30s -->
+            <div id="tab-conteudo-postura" class="tab-pane">
+                <div class="lista-avisos-header">
+                    <span>Registros de Proximidade (>30s)</span>
+                    <button id="btn-limpar-avisos" class="btn-link">Limpar</button>
+                </div>
+                <ul id="lista-avisos-postura" class="lista-avisos">
+                    <!-- Itens inseridos via JS -->
+                </ul>
             </div>
         </div>
     </div>
 
-    <!-- Script Principal como Módulo -->
     <script type="module" src="js/main.js"></script>
 </body>
+
 </html>
