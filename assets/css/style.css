@@ -4,7 +4,6 @@
     --bg-card-hover: #1c212b;
     --border-color: #242b35;
     --accent-green: #00ff88;
-    --accent-blue: #4cc9f0;
     --accent-pink: #ff3333;
     --text-primary: #f0f3f6;
     --text-secondary: #94a3b8;
@@ -20,37 +19,42 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-html {
+html, body {
     height: 100%;
+    height: 100dvh;
+    width: 100vw;
     overflow: hidden;
+    touch-action: none;
 }
 
 body {
-    height: 100vh;
-    height: 100dvh; /* Garante altura exata ignorando barras móveis */
-    width: 100vw;
-    margin: 0;
-    padding: 0;
     background-color: var(--bg-main);
     color: var(--text-primary);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between; /* Mantém topo na margem superior, rodapé na base e centro alinhado */
-    box-sizing: border-box;
-    overflow: hidden; /* Trava qualquer rolagem indesejada */
-    touch-action: none; /* Desativa o gesto de rolagem do toque no mobile */
+    justify-content: space-between;
 }
 
 /* ==========================================================================
-   Overlay de Carregamento Adaptável
+   Ícones SVG Padronizados
+   ========================================================================== */
+.icon-svg {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    object-fit: contain;
+}
+
+/* ==========================================================================
+   Overlay de Carregamento
    ========================================================================== */
 .loading-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    inset: 0;
     background: rgba(12, 14, 18, 0.95);
     backdrop-filter: blur(8px);
     display: flex;
@@ -77,7 +81,7 @@ body {
 .loading-guide-img {
     width: 100%;
     height: auto;
-    max-height: 48vh;
+    max-height: 46vh;
     object-fit: contain;
     border-radius: var(--radius-md);
     margin-bottom: 18px;
@@ -109,7 +113,7 @@ body {
 .navbar {
     width: 100%;
     max-width: 1000px;
-    padding: 20px 24px;
+    padding: 16px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -169,7 +173,6 @@ body {
 .btn-menu {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-color);
-    color: var(--text-primary);
     width: 38px;
     height: 38px;
     border-radius: var(--radius-md);
@@ -178,20 +181,19 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    cursor: pointer;
+    pointer-events: auto;
 }
 
-.btn-menu:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--accent-green);
-}
-
-.btn-menu svg {
-    width: 20px;
-    height: 20px;
+.btn-menu img,
+.btn-menu svg,
+.btn-sidebar img,
+.btn-sidebar svg {
+    pointer-events: none;
 }
 
 /* ==========================================================================
-   Container & Câmera com Borda Arredondada
+   Container & Câmera Centralizados
    ========================================================================== */
 .main-container {
     width: 100%;
@@ -202,12 +204,12 @@ body {
     justify-content: center;
     padding: 0 16px;
     flex: 1;
-    min-height: 0; /* Impede que elementos filhos expandam o body */
+    margin: auto 0;
 }
 
 .hero-text {
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .hero-text h1 {
@@ -226,12 +228,12 @@ body {
 .camera-wrapper {
     position: relative;
     width: 100%;
-    max-width: 640px;
+    max-width: 580px;
     border-radius: var(--radius-lg);
     padding: 3px;
     background: linear-gradient(180deg, var(--border-color) 0%, transparent 100%);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .video-container {
@@ -271,8 +273,8 @@ body {
 .controls-panel {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 10px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
     justify-content: center;
     width: 100%;
@@ -301,18 +303,8 @@ body {
     background: #ffffff;
 }
 
-.btn-secondary {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.btn-secondary:hover {
-    background: var(--bg-card-hover);
-}
-
 .badge-calibrada {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     color: var(--text-secondary);
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -322,14 +314,13 @@ body {
 }
 
 .telemetry-bar {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--text-secondary);
     font-family: monospace;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    padding: 8px 16px;
+    padding: 6px 14px;
     border-radius: var(--radius-md);
-    margin-bottom: 12px;
     text-align: center;
 }
 
@@ -338,32 +329,32 @@ body {
    ========================================================================== */
 .sidebar-backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(4px);
     z-index: 9990;
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
     transition: all 0.3s ease;
 }
 
 .sidebar-backdrop.active {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 .sidebar {
-    position: fixed;
+    position: fixed !important;
     top: 0;
     right: -320px;
-    width: 300px;
+    width: 290px;
     height: 100vh;
+    height: 100dvh;
     background: var(--bg-card);
     border-left: 1px solid var(--border-color);
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
     z-index: 9995;
     transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
@@ -373,33 +364,30 @@ body {
 }
 
 .sidebar.active {
-    right: 0;
+    right: 0 !important;
 }
 
 .sidebar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 12px;
 }
 
 .sidebar-header h3 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 600;
 }
 
 .sidebar-close {
     background: transparent;
     border: none;
-    color: var(--text-secondary);
-    font-size: 1.6rem;
     cursor: pointer;
-}
-
-.sidebar-close:hover {
-    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .sidebar-content {
@@ -412,28 +400,22 @@ body {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
+    gap: 12px;
+    padding: 12px 14px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 500;
     transition: all 0.2s ease;
+    text-align: left;
 }
 
 .btn-sidebar:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: var(--accent-green);
-    transform: translateX(-2px);
-}
-
-.btn-sidebar svg {
-    width: 18px;
-    height: 18px;
-    color: var(--accent-green);
 }
 
 .sidebar-item-container.hidden,
@@ -442,7 +424,7 @@ body {
 }
 
 /* ==========================================================================
-   Toasts & Pop-ups
+   Toasts
    ========================================================================== */
 .toast-container {
     position: fixed;
@@ -459,13 +441,13 @@ body {
     background: var(--bg-card);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    padding: 12px 18px;
+    padding: 12px 16px;
     border-radius: var(--radius-md);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 0.9rem;
+    gap: 10px;
+    font-size: 0.88rem;
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -494,10 +476,6 @@ body {
     padding: 0 4px;
 }
 
-.toast-fechar:hover {
-    color: var(--text-primary);
-}
-
 #toast-postura-grande {
     position: fixed;
     top: 35%;
@@ -506,8 +484,8 @@ body {
     background: rgba(239, 68, 68, 0.95);
     color: #ffffff;
     font-weight: 700;
-    font-size: 1.2rem;
-    padding: 20px 30px;
+    font-size: 1.1rem;
+    padding: 18px 24px;
     border-radius: var(--radius-lg);
     box-shadow: 0 20px 50px rgba(239, 68, 68, 0.4);
     z-index: 10001;
@@ -518,15 +496,28 @@ body {
     transform: translate(-50%, -50%) scale(1);
 }
 
+.toast-svg-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.toast-svg-icon-grande {
+    width: 24px;
+    height: 24px;
+}
+
+.status-svg-icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+}
+
 /* ==========================================================================
-   Modal do Gráfico & Abas de Avisos
+   Modal do Gráfico & Histórico
    ========================================================================== */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    inset: 0;
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(5px);
     display: flex;
@@ -543,9 +534,9 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 24px;
+    padding: 20px;
     width: 90%;
-    max-width: 650px;
+    max-width: 620px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.6);
 }
 
@@ -553,19 +544,15 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .modal-close {
     background: transparent;
     border: none;
-    color: var(--text-secondary);
-    font-size: 1.6rem;
     cursor: pointer;
-}
-
-.modal-close:hover {
-    color: var(--text-primary);
+    display: flex;
+    align-items: center;
 }
 
 .modal-tabs {
@@ -577,7 +564,7 @@ body {
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     padding: 6px 12px;
     border-radius: 8px;
@@ -600,7 +587,7 @@ body {
 
 .chart-container {
     position: relative;
-    height: 280px;
+    height: 260px;
     width: 100%;
 }
 
@@ -608,9 +595,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: #8b949e;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .btn-link {
@@ -618,7 +605,7 @@ body {
     border: none;
     color: #f72585;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
 }
 
 .btn-link:hover {
@@ -627,13 +614,12 @@ body {
 
 .lista-avisos {
     list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 260px;
+    max-height: 240px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    touch-action: pan-y;
 }
 
 .aviso-item {
@@ -643,9 +629,9 @@ body {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-left: 3px solid #f72585;
-    padding: 10px 14px;
+    padding: 10px 12px;
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
 }
 
 .aviso-item .aviso-hora {
@@ -656,31 +642,7 @@ body {
 
 .aviso-item .aviso-desc {
     color: #8b949e;
-    font-size: 0.78rem;
-}
-
-.toast-svg-icon {
-    width: 18px;
-    height: 18px;
-    vertical-align: middle;
-    margin-right: 6px;
-    display: inline-block;
-}
-
-.toast-svg-icon-grande {
-    width: 26px;
-    height: 26px;
-    vertical-align: middle;
-    margin-right: 8px;
-    display: inline-block;
-}
-
-.status-svg-icon {
-    width: 16px;
-    height: 16px;
-    vertical-align: text-bottom;
-    margin-right: 4px;
-    display: inline-block;
+    font-size: 0.75rem;
 }
 
 /* ==========================================================================
@@ -688,22 +650,20 @@ body {
    ========================================================================== */
 .app-footer {
     width: 100%;
-    margin-top: auto;
-    padding: 24px 16px;
+    padding: 14px 16px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .footer-copy {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
-    margin: 0;
 }
 
 .footer-copy a {
@@ -712,17 +672,12 @@ body {
     font-weight: 500;
 }
 
-.footer-copy a:hover {
-    text-decoration: underline;
-}
-
 .footer-separator {
     color: var(--border-color);
-    user-select: none;
 }
 
 .footer-version {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: ui-monospace, monospace;
     font-size: 0.75rem;
     background: rgba(0, 255, 136, 0.08);
     border: 1px solid rgba(0, 255, 136, 0.2);
@@ -733,19 +688,11 @@ body {
 }
 
 /* ==========================================================================
-   Responsividade Mobile (Smartphones e Telas Pequenas)
+   Mobile (Smartphones)
    ========================================================================== */
 @media (max-width: 600px) {
-    html,
     body {
-        height: 100dvh;
-        overflow: hidden;
-    }
-
-    /* Permite rolagem exclusivamente dentro da lista de avisos do modal */
-    .lista-avisos {
-        touch-action: pan-y;
-        overflow-y: auto;
+        padding-top: env(safe-area-inset-top, 0px);
     }
 
     .navbar {
@@ -756,50 +703,42 @@ body {
     }
 
     .main-container {
-        justify-content: center;
-        padding: 8px 16px;
-        margin: auto 0;
-    }
-
-    .hero-text {
-        margin-bottom: 10px;
+        padding: 6px 16px;
     }
 
     .hero-text h1 {
-        font-size: 1.15rem;
+        font-size: 1.12rem;
     }
 
     .camera-wrapper {
-        width: 100%;
-        max-width: 360px; /* Evita que a câmera ocupe altura excessiva */
+        max-width: 360px;
         margin-bottom: 12px;
     }
 
     .controls-panel {
-        width: 100%;
         max-width: 360px;
         flex-direction: column;
         gap: 8px;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
     .controls-panel .btn,
-    .badge-calibrada {
-        width: 100%;
-        text-align: center;
-        box-sizing: border-box;
-    }
-
+    .badge-calibrada,
     .telemetry-bar {
         width: 100%;
         max-width: 360px;
-        font-size: 0.72rem;
         text-align: center;
         box-sizing: border-box;
-        margin-bottom: 0;
     }
 
-    .app-footer {
-        padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+    .toast-container {
+        right: 12px;
+        left: 12px;
+        bottom: 16px;
+    }
+
+    .toast {
+        width: 100%;
+        font-size: 0.8rem;
     }
 }
