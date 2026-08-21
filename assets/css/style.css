@@ -719,12 +719,13 @@ body {
     }
 
     .camera-wrapper {
-        max-width: 320px;
+        width: fit-content;
+        max-width: 88vw;
         margin-bottom: 10px;
     }
 
     #webcam {
-        max-height: 42vh;
+        max-height: 44vh;
     }
 
     .controls-panel {

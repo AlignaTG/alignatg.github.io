@@ -1,1 +1,1 @@
-Atualizar para quando o usuario não esteja no computador ou não seja identificado o contador não funcione.
+.
