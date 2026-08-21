@@ -16,9 +16,10 @@ export async function iniciarCamera(videoElement, canvasElement, statusElement) 
 
         return new Promise((resolve) => {
             videoElement.onloadedmetadata = async () => {
-                const w = videoElement.videoWidth || 640;
-                const h = videoElement.videoHeight || 480;
+                const w = videoElement.videoWidth;
+                const h = videoElement.videoHeight;
 
+                // Define as dimensões internas exatas do buffer
                 videoElement.width = w;
                 videoElement.height = h;
 
@@ -27,16 +28,6 @@ export async function iniciarCamera(videoElement, canvasElement, statusElement) 
                     canvasElement.height = h;
                 }
 
-                // Ajusta proporção no container do vídeo se for celular (orientação retrato)
-                const videoContainer = videoElement.closest('.video-container');
-                if (videoContainer) {
-                    if (w < h) {
-                        videoContainer.style.aspectRatio = `${w} / ${h}`;
-                    } else {
-                        videoContainer.style.aspectRatio = "4 / 3";
-                    }
-                }
-                
                 await videoElement.play();
                 resolve(videoElement);
             };

@@ -37,7 +37,7 @@ body {
 }
 
 /* ==========================================================================
-   Ícones SVG Padronizados
+   Ícones SVG Padronizados & Acessibilidade de Clique
    ========================================================================== */
 .icon-svg {
     width: 20px;
@@ -47,6 +47,14 @@ body {
     display: inline-block;
     vertical-align: middle;
     object-fit: contain;
+    pointer-events: none;
+}
+
+.btn-menu img,
+.btn-menu svg,
+.btn-sidebar img,
+.btn-sidebar svg {
+    pointer-events: none;
 }
 
 /* ==========================================================================
@@ -75,7 +83,7 @@ body {
     width: 100%;
     max-width: 440px;
     text-align: center;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
 .loading-guide-img {
@@ -181,19 +189,15 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    cursor: pointer;
-    pointer-events: auto;
 }
 
-.btn-menu img,
-.btn-menu svg,
-.btn-sidebar img,
-.btn-sidebar svg {
-    pointer-events: none;
+.btn-menu:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-green);
 }
 
 /* ==========================================================================
-   Container & Câmera Centralizados
+   Container & Câmera com Proporção Natural e Centralização
    ========================================================================== */
 .main-container {
     width: 100%;
@@ -205,24 +209,25 @@ body {
     padding: 0 16px;
     flex: 1;
     margin: auto 0;
+    min-height: 0;
 }
 
 .hero-text {
     text-align: center;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .hero-text h1 {
     font-size: 1.35rem;
     font-weight: 600;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .status-indicator {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-secondary);
-    min-height: 24px;
+    min-height: 22px;
 }
 
 .camera-wrapper {
@@ -233,25 +238,27 @@ body {
     padding: 3px;
     background: linear-gradient(180deg, var(--border-color) 0%, transparent 100%);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .video-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    border-radius: var(--radius-lg);
+    border-radius: calc(var(--radius-lg) - 2px);
     overflow: hidden;
     background: #000;
+    line-height: 0;
 }
 
 #webcam {
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    max-height: 48vh;
+    object-fit: contain;
     border-radius: inherit;
     transform: scaleX(-1);
 }
@@ -262,6 +269,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
+    object-fit: contain;
     border-radius: inherit;
     transform: scaleX(-1);
     pointer-events: none;
@@ -274,7 +282,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     flex-wrap: wrap;
     justify-content: center;
     width: 100%;
@@ -424,7 +432,7 @@ body {
 }
 
 /* ==========================================================================
-   Toasts
+   Toasts & Alertas
    ========================================================================== */
 .toast-container {
     position: fixed;
@@ -537,7 +545,7 @@ body {
     padding: 20px;
     width: 90%;
     max-width: 620px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
 .modal-header {
@@ -688,7 +696,7 @@ body {
 }
 
 /* ==========================================================================
-   Mobile (Smartphones)
+   Responsividade Mobile (Smartphones e Telas Pequenas)
    ========================================================================== */
 @media (max-width: 600px) {
     body {
@@ -711,12 +719,16 @@ body {
     }
 
     .camera-wrapper {
-        max-width: 360px;
-        margin-bottom: 12px;
+        max-width: 320px;
+        margin-bottom: 10px;
+    }
+
+    #webcam {
+        max-height: 42vh;
     }
 
     .controls-panel {
-        max-width: 360px;
+        max-width: 320px;
         flex-direction: column;
         gap: 8px;
         margin-bottom: 8px;
@@ -726,7 +738,7 @@ body {
     .badge-calibrada,
     .telemetry-bar {
         width: 100%;
-        max-width: 360px;
+        max-width: 320px;
         text-align: center;
         box-sizing: border-box;
     }
@@ -740,32 +752,5 @@ body {
     .toast {
         width: 100%;
         font-size: 0.8rem;
-    }
-
-    .camera-wrapper {
-        width: 100%;
-        max-width: 330px;
-        margin-bottom: 12px;
-    }
-
-    .video-container {
-        width: 100%;
-        height: auto;
-        /* Remove a trava rígida de 4/3 no mobile para aceitar a orientação natural do sensor */
-        aspect-ratio: auto; 
-        min-height: 250px;
-        max-height: 38vh;
-    }
-
-    /* Garante alinhamento 1:1 de pixel entre a imagem do vídeo e a malha do canvas */
-    #webcam,
-    #output {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: fill; /* 📍 Elimina o achatamento dos pontos no celular */
-        transform: scaleX(-1);
     }
 }
