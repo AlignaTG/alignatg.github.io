@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
     <!-- Overlay de Inicialização -->
@@ -45,18 +47,34 @@
 
         <div class="camera-wrapper">
             <div class="video-container">
+                <img id="img-loading" src="assets/image/correctposturedark.jpg" alt="Instrução de postura correta" class="loading-guide-img hidden">
                 <video id="webcam" playsinline muted></video>
                 <canvas id="output"></canvas>
             </div>
         </div>
 
+        <!-- Controles de Postura, Calibração, Pausa e Histórico -->
         <div class="controls-panel">
             <button id="btn-calibrar" class="btn btn-primary">Calibrar Distância Ideal (Foto)</button>
+            <button id="btn-pausa" class="btn btn-secondary">Pausar Sistema</button>
             <div id="distancia-calibrada" class="badge-calibrada">Distância base: Não definida</div>
         </div>
 
         <div id="ear-value" class="telemetry-bar">EAR: -- | Distância: -- | Ciclo: 60s</div>
+
+        <!-- Tela de Descanso Obrigatória (30s) -->
+        <div id="tela-descanso" class="tela-descanso hidden">
+            <div class="descanso-content">
+                <h2>Pausa para Descanso Visual</h2>
+                <p>Você ficou abaixo da meta de piscadas em dois ciclos consecutivos.</p>
+                <p>Feche os olhos e descanse a vista por:</p>
+                <div id="contador-descanso" class="contador-descanso">30s</div>
+            </div>
+        </div>
     </main>
+
+    <!-- Container de Notificações / Pop-ups Flutuantes -->
+    <div id="toast-container" class="toast-container"></div>
 
     <!-- Rodapé -->
     <footer class="app-footer">
@@ -64,7 +82,7 @@
             <span>© 2026 João Latczuk</span>
             <span class="footer-separator">•</span>
             <span>Código aberto sob licença <a href="#">MIT</a></span>
-            <span class="footer-version">v1.0.8</span>
+            <span class="footer-version">v1.0.9</span>
         </div>
     </footer>
 
@@ -131,4 +149,5 @@
 
     <script type="module" src="js/main.js"></script>
 </body>
+
 </html>

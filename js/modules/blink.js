@@ -12,6 +12,15 @@ let alertaPiscadaAtivo = false;
 let tempoDecorridoAcumulado = 0;
 let ultimoTimestampPresente = null;
 
+// Controle de ciclos para tela de descanso
+let ciclosConsecutivosAbaixoDaMeta = 0;
+let modoDescansoAtivo = false;
+let tempoInicioDescanso = 0;
+const DURACAO_DESCANSO_MS = 20 * 1000;
+
+// Controle de pausa geral
+let sistemaPausado = false;
+
 const historicoPiscadas = [];
 
 export function setLimiteEar(novoLimite) {
@@ -24,27 +33,71 @@ export function getLimiteEar() {
     return limiteEarAtual;
 }
 
+export function alternarPausaSistema() {
+    sistemaPausado = !sistemaPausado;
+    ultimoTimestampPresente = null;
+    return sistemaPausado;
+}
+
+export function getSistemaPausado() {
+    return sistemaPausado;
+}
+
 /**
- * Processa a janela de tempo e reinicia do zero ao detectar retorno do usuário
+ * Processa a janela de tempo mantendo a contagem intacta durante o descanso
  * @param {boolean} usuarioPresente 
  */
 export function processarCicloTempo(usuarioPresente = false) {
     const agora = Date.now();
     let novoAlertaDisparado = false;
 
-    if (usuarioPresente) {
-        // Se a pessoa acabou de voltar (estava ausente), reseta tudo para o início
-        if (ultimoTimestampPresente === null) {
-            tempoDecorridoAcumulado = 0;
-            contadorPiscadasJanela = 0;
-            ultimoTimestampPresente = agora;
+    // Pausa manual: congela referência sem perder dados acumulados
+    if (sistemaPausado) {
+        ultimoTimestampPresente = null;
+        const tempoRestanteSegundos = Math.max(0, Math.ceil((JANELA_TEMPO_MS - tempoDecorridoAcumulado) / 1000));
+        return {
+            tempoRestante: tempoRestanteSegundos,
+            piscadasMinutoAtual: contadorPiscadasJanela,
+            piscadasUltimoMinuto,
+            alertaAtivo: false,
+            novoAlertaDisparado: false,
+            modoDescanso: false
+        };
+    }
+
+    // Tela de descanso de 30s ativa
+    if (modoDescansoAtivo) {
+        const tempoDecorridoDescanso = agora - tempoInicioDescanso;
+
+        if (tempoDecorridoDescanso >= DURACAO_DESCANSO_MS) {
+            // Fim do descanso: desativa o modo e anula o timestamp anterior
+            // Mantém tempoDecorridoAcumulado e contadorPiscadasJanela exatamente onde pararam
+            modoDescansoAtivo = false;
+            ciclosConsecutivosAbaixoDaMeta = 0;
+            ultimoTimestampPresente = null;
         } else {
+            // Durante o descanso: anula o timestamp para não contar tempo do ciclo
+            ultimoTimestampPresente = null;
+            return {
+                tempoRestante: Math.max(0, Math.ceil((JANELA_TEMPO_MS - tempoDecorridoAcumulado) / 1000)),
+                piscadasMinutoAtual: contadorPiscadasJanela,
+                piscadasUltimoMinuto,
+                alertaAtivo: true,
+                novoAlertaDisparado: false,
+                modoDescanso: true,
+                tempoDescansoRestante: Math.ceil((DURACAO_DESCANSO_MS - tempoDecorridoDescanso) / 1000)
+            };
+        }
+    }
+
+    if (usuarioPresente) {
+        if (ultimoTimestampPresente !== null) {
             const delta = agora - ultimoTimestampPresente;
             tempoDecorridoAcumulado += delta;
-            ultimoTimestampPresente = agora;
         }
+        ultimoTimestampPresente = agora;
 
-        // Quando atinge os 60 segundos completos de presença contínua
+        // Completa o minuto ativo
         if (tempoDecorridoAcumulado >= JANELA_TEMPO_MS) {
             piscadasUltimoMinuto = contadorPiscadasJanela;
             alertaPiscadaAtivo = piscadasUltimoMinuto < PISCADAS_MINIMAS_POR_MINUTO;
@@ -60,16 +113,22 @@ export function processarCicloTempo(usuarioPresente = false) {
 
             if (alertaPiscadaAtivo) {
                 novoAlertaDisparado = true;
+                ciclosConsecutivosAbaixoDaMeta++;
+
+                if (ciclosConsecutivosAbaixoDaMeta >= 2) {
+                    modoDescansoAtivo = true;
+                    tempoInicioDescanso = Date.now();
+                }
+            } else {
+                ciclosConsecutivosAbaixoDaMeta = 0;
             }
 
             contadorPiscadasJanela = 0;
             tempoDecorridoAcumulado = 0;
         }
     } else {
-        // Usuário ausente: limpa o timestamp e zera o progresso acumulado
         ultimoTimestampPresente = null;
-        tempoDecorridoAcumulado = 0;
-        contadorPiscadasJanela = 0;
+        olhoFechado = false;
     }
 
     const tempoRestanteSegundos = Math.max(0, Math.ceil((JANELA_TEMPO_MS - tempoDecorridoAcumulado) / 1000));
@@ -79,11 +138,13 @@ export function processarCicloTempo(usuarioPresente = false) {
         piscadasMinutoAtual: contadorPiscadasJanela,
         piscadasUltimoMinuto,
         alertaAtivo: alertaPiscadaAtivo,
-        novoAlertaDisparado
+        novoAlertaDisparado,
+        modoDescanso: false
     };
 }
 
 export function registrarPiscada(earMedio) {
+    if (sistemaPausado || modoDescansoAtivo) return;
     if (typeof earMedio !== 'number' || isNaN(earMedio)) return;
 
     if (earMedio < limiteEarAtual) {
@@ -102,4 +163,9 @@ export function getHistoricoPiscadas() {
 
 export function limparHistoricoPiscadas() {
     historicoPiscadas.length = 0;
+    tempoDecorridoAcumulado = 0;
+    contadorPiscadasJanela = 0;
+    ultimoTimestampPresente = null;
+    ciclosConsecutivosAbaixoDaMeta = 0;
+    modoDescansoAtivo = false;
 }
