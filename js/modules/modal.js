@@ -44,7 +44,6 @@ export function inicializarModal() {
             li.innerHTML = `
                 <div>
                     <span class="aviso-hora">${item.horario}</span>
-                    <span class="aviso-desc">(${item.data})</span>
                 </div>
                 <span class="aviso-desc">${item.mensagem}</span>
             `;

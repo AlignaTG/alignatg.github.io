@@ -10,16 +10,30 @@ const historicoAvisos = [];
  * Registra um novo alerta de proximidade
  * @param {number} segundosPerto
  */
+
 export function registrarAvisoPostura(segundosPerto) {
     const agora = new Date();
     const horarioFormatado = agora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const dataFormatada = agora.toLocaleDateString([], { day: '2-digit', month: '2-digit' }); // Ex: 09/09
 
-    historicoAvisos.unshift({
+    const novoItem = {
         id: Date.now(),
         horario: horarioFormatado,
-        duracao: segundosPerto
-    });
-
+        hora: horarioFormatado,
+        duracao: segundosPerto,
+        segundos: segundosPerto,
+        tipo: `${segundosPerto}s contínuos`,
+        detalhes: `Muito perto por ${segundosPerto}s`,
+        mensagem: `Muito perto por ${segundosPerto}s`,
+        valor: `${segundosPerto}s`,
+        // Propriedades comuns herdadas da aba de piscadas:
+        ppm: `${segundosPerto}s`,
+        piscadas: `${segundosPerto}s`,
+        classificacao: 'Proximidade',
+        status: 'Alerta'
+    };
+    
+    historicoAvisos.unshift(novoItem);
     renderizarListaAvisos();
 }
 

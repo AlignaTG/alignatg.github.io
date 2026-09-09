@@ -1,28 +1,42 @@
-// Limiar padrão inicial caso não seja feita calibração
+// ============================================================================
+// CONFIGURAÇÕES E CONSTANTES
+// ============================================================================
 export const LIMITE_EAR_PADRAO = 0.21;
 export let limiteEarAtual = LIMITE_EAR_PADRAO;
 
+// Parâmetros clínicos de ergonomia visual
 export const PISCADAS_MINIMAS_POR_MINUTO = 6;
 export const JANELA_TEMPO_MS = 60 * 1000;
+export const DURACAO_DESCANSO_MS = 20 * 1000; // Regra 20-20-20 (20 segundos)
 
+// Filtro temporal fisiológico para validação de piscada (em milissegundos)
+const DURACAO_MIN_PISCADA_MS = 80;   // Descarta ruído de 1 único frame do FaceMesh
+const DURACAO_MAX_PISCADA_MS = 450;  // Acima disso é considerado fechamento prolongado/cochilo
+
+// ============================================================================
+// ESTADO INTERNO DO MÓDULO
+// ============================================================================
 let contadorPiscadasJanela = 0;
-let olhoFechado = false;
+let timestampInicioFechado = null;
 let piscadasUltimoMinuto = 0;
 let alertaPiscadaAtivo = false;
 let tempoDecorridoAcumulado = 0;
 let ultimoTimestampPresente = null;
 
-// Controle de ciclos para tela de descanso
+// Controle da tela de descanso obrigatória
 let ciclosConsecutivosAbaixoDaMeta = 0;
 let modoDescansoAtivo = false;
 let tempoInicioDescanso = 0;
-const DURACAO_DESCANSO_MS = 20 * 1000;
 
-// Controle de pausa geral
+// Controle de pausa manual
 let sistemaPausado = false;
 
+// Histórico volátil
 const historicoPiscadas = [];
 
+// ============================================================================
+// GETTERS & SETTERS DE CONTROLE
+// ============================================================================
 export function setLimiteEar(novoLimite) {
     if (typeof novoLimite === 'number' && !isNaN(novoLimite) && novoLimite > 0) {
         limiteEarAtual = novoLimite;
@@ -36,6 +50,7 @@ export function getLimiteEar() {
 export function alternarPausaSistema() {
     sistemaPausado = !sistemaPausado;
     ultimoTimestampPresente = null;
+    timestampInicioFechado = null;
     return sistemaPausado;
 }
 
@@ -43,17 +58,45 @@ export function getSistemaPausado() {
     return sistemaPausado;
 }
 
-/**
- * Processa a janela de tempo mantendo a contagem intacta durante o descanso
- * @param {boolean} usuarioPresente 
- */
+// ============================================================================
+// REGISTRO TEMPORAL DE PISCADAS
+// ============================================================================
+export function registrarPiscada(earMedio) {
+    if (sistemaPausado || modoDescansoAtivo) return;
+    if (typeof earMedio !== 'number' || isNaN(earMedio)) return;
+
+    const agora = performance.now();
+
+    if (earMedio < limiteEarAtual) {
+        // Marca o início da descida da pálpebra
+        if (timestampInicioFechado === null) {
+            timestampInicioFechado = agora;
+        }
+    } else {
+        // O olho reabriu: valida a duração do fechamento
+        if (timestampInicioFechado !== null) {
+            const duracaoFechado = agora - timestampInicioFechado;
+
+            if (duracaoFechado >= DURACAO_MIN_PISCADA_MS && duracaoFechado <= DURACAO_MAX_PISCADA_MS) {
+                contadorPiscadasJanela++;
+            }
+
+            timestampInicioFechado = null;
+        }
+    }
+}
+
+// ============================================================================
+// PROCESSAMENTO DO CICLO DE TEMPO (JANELA DE 60s)
+// ============================================================================
 export function processarCicloTempo(usuarioPresente = false) {
     const agora = Date.now();
     let novoAlertaDisparado = false;
 
-    // Pausa manual: congela referência sem perder dados acumulados
+    // 1. Pausa manual
     if (sistemaPausado) {
         ultimoTimestampPresente = null;
+        timestampInicioFechado = null;
         const tempoRestanteSegundos = Math.max(0, Math.ceil((JANELA_TEMPO_MS - tempoDecorridoAcumulado) / 1000));
         return {
             tempoRestante: tempoRestanteSegundos,
@@ -65,19 +108,18 @@ export function processarCicloTempo(usuarioPresente = false) {
         };
     }
 
-    // Tela de descanso de 30s ativa
+    // 2. Modo descanso ativo
     if (modoDescansoAtivo) {
         const tempoDecorridoDescanso = agora - tempoInicioDescanso;
 
         if (tempoDecorridoDescanso >= DURACAO_DESCANSO_MS) {
-            // Fim do descanso: desativa o modo e anula o timestamp anterior
-            // Mantém tempoDecorridoAcumulado e contadorPiscadasJanela exatamente onde pararam
             modoDescansoAtivo = false;
             ciclosConsecutivosAbaixoDaMeta = 0;
             ultimoTimestampPresente = null;
+            timestampInicioFechado = null;
         } else {
-            // Durante o descanso: anula o timestamp para não contar tempo do ciclo
             ultimoTimestampPresente = null;
+            timestampInicioFechado = null;
             return {
                 tempoRestante: Math.max(0, Math.ceil((JANELA_TEMPO_MS - tempoDecorridoAcumulado) / 1000)),
                 piscadasMinutoAtual: contadorPiscadasJanela,
@@ -90,6 +132,7 @@ export function processarCicloTempo(usuarioPresente = false) {
         }
     }
 
+    // 3. Monitoramento com usuário presente
     if (usuarioPresente) {
         if (ultimoTimestampPresente !== null) {
             const delta = agora - ultimoTimestampPresente;
@@ -97,7 +140,7 @@ export function processarCicloTempo(usuarioPresente = false) {
         }
         ultimoTimestampPresente = agora;
 
-        // Completa o minuto ativo
+        // Fim da janela de 60 segundos ativos
         if (tempoDecorridoAcumulado >= JANELA_TEMPO_MS) {
             piscadasUltimoMinuto = contadorPiscadasJanela;
             alertaPiscadaAtivo = piscadasUltimoMinuto < PISCADAS_MINIMAS_POR_MINUTO;
@@ -127,8 +170,9 @@ export function processarCicloTempo(usuarioPresente = false) {
             tempoDecorridoAcumulado = 0;
         }
     } else {
+        // Usuário ausente: congela cronômetro e anula fechamento pendente
         ultimoTimestampPresente = null;
-        olhoFechado = false;
+        timestampInicioFechado = null;
     }
 
     const tempoRestanteSegundos = Math.max(0, Math.ceil((JANELA_TEMPO_MS - tempoDecorridoAcumulado) / 1000));
@@ -143,20 +187,9 @@ export function processarCicloTempo(usuarioPresente = false) {
     };
 }
 
-export function registrarPiscada(earMedio) {
-    if (sistemaPausado || modoDescansoAtivo) return;
-    if (typeof earMedio !== 'number' || isNaN(earMedio)) return;
-
-    if (earMedio < limiteEarAtual) {
-        olhoFechado = true;
-    } else {
-        if (olhoFechado) {
-            contadorPiscadasJanela++;
-            olhoFechado = false;
-        }
-    }
-}
-
+// ============================================================================
+// HISTÓRICO E RESET
+// ============================================================================
 export function getHistoricoPiscadas() {
     return [...historicoPiscadas];
 }
@@ -166,6 +199,7 @@ export function limparHistoricoPiscadas() {
     tempoDecorridoAcumulado = 0;
     contadorPiscadasJanela = 0;
     ultimoTimestampPresente = null;
+    timestampInicioFechado = null;
     ciclosConsecutivosAbaixoDaMeta = 0;
     modoDescansoAtivo = false;
 }

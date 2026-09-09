@@ -113,7 +113,7 @@ async function executarCalibracao() {
         const earEsq = calcularEAR(pE[0], pE[1], pE[2], pE[3], pE[4], pE[5]);
         const earDir = calcularEAR(pD[0], pD[1], pD[2], pD[3], pD[4], pD[5]);
         const earMedio = (earEsq + earDir) / 2;
-        const novoLimiteEar = earMedio * 0.68;
+        const novoLimiteEar = earMedio * 0.75;
         setLimiteEar(novoLimiteEar);
 
         // 3. Atualiza UI e move botão para a sidebar
