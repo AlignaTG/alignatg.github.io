@@ -1,11 +1,20 @@
 // ============================================================================
-// 1. IMPORTAÇÃO DE BIBLIOTECAS (Formato de Módulo Nativo)
+// 1. IMPORTAÇÃO DE BIBLIOTECAS E MÓDULOS
 // ============================================================================
 import 'https://esm.sh/@tensorflow/tfjs-core@4.20.0';
 import 'https://esm.sh/@tensorflow/tfjs-converter@4.20.0';
 import 'https://esm.sh/@tensorflow/tfjs-backend-webgl@4.20.0';
 import * as faceLandmarksDetection from 'https://esm.sh/@tensorflow-models/face-landmarks-detection@1.0.5';
 
+// Importação das funções e constantes geométricas do módulo externo
+import {
+    INDEX_OLHO_EXTERNO_ESQ,
+    INDEX_OLHO_EXTERNO_DIR,
+    INDICES_OLHO_ESQUERDO,
+    INDICES_OLHO_DIREITO,
+    calcularEAR,
+    calcularDistanciaFace
+} from './geometry.js';
 
 // ============================================================================
 // 2. CONFIGURAÇÕES E MAPEAMENTO DO DOM
@@ -36,16 +45,8 @@ let alertaPiscadaAtivo = false;
 let distanciaPadraoPixel = null; // Variável fixa definida pelo botão de calibração
 let inicioProximidadeExcessiva = null; // Cronômetro de postura
 let alertaPosturaAtivo = false;
-const TEMPO_LIMITE_POSTURA_MS = 60; // 2 minutos (120.000 ms)
+const TEMPO_LIMITE_POSTURA_MS = 60;
 const MARGEM_PROXIMIDADE = 1.15; // 15% maior em pixels já é considerado "muito perto"
-
-// Landmarks para cálculo de distância da face (Canto externo do olho esquerdo e direito)
-const INDEX_OLHO_EXTERNO_ESQ = 33;
-const INDEX_OLHO_EXTERNO_DIR = 263;
-
-// Índices dos pontos dos olhos para cálculo do EAR
-const indicesOlhoEsquerdo = [33, 160, 158, 133, 153, 144];
-const indicesOlhoDireito = [362, 385, 387, 263, 373, 380];
 
 // ============================================================================
 // 3. FUNÇÕES DA APLICAÇÃO
@@ -64,18 +65,6 @@ async function iniciarCamera() {
         statusDiv.innerText = "Erro ao acessar a webcam. Verifique as permissões.";
         console.error(err);
     }
-}
-
-function calcularEAR(p1, p2, p3, p4, p5, p6) {
-    const dVert1 = Math.hypot(p2.x - p6.x, p2.y - p6.y);
-    const dVert2 = Math.hypot(p3.x - p5.x, p3.y - p5.y);
-    const dHoriz = Math.hypot(p1.x - p4.x, p1.y - p4.y);
-    return (dVert1 + dVert2) / (2.0 * dHoriz);
-}
-
-// Calcula a distância euclidiana entre dois pontos faciais na imagem
-function calcularDistanciaFace(pEsq, pDir) {
-    return Math.hypot(pDir.x - pEsq.x, pDir.y - pEsq.y);
 }
 
 function atualizarContadorTempo() {
@@ -101,7 +90,7 @@ function verificarPostura(distanciaAtual) {
     // Se o rosto estiver mais largo/próximo que o limite tolerado
     if (distanciaAtual > limiteMuitoPerto) {
         if (!inicioProximidadeExcessiva) {
-            inicioProximidadeExcessiva = Date.now(); // Inicia cronômetro de 2 min
+            inicioProximidadeExcessiva = Date.now();
         } else {
             const tempoMuitoPerto = Date.now() - inicioProximidadeExcessiva;
             if (tempoMuitoPerto >= TEMPO_LIMITE_POSTURA_MS) {
@@ -139,16 +128,16 @@ async function processarVideo() {
                 ctx.fillRect(ponto.x, ponto.y, 1.5, 1.5);
             });
 
-            // Separação dos pontos dos olhos
-            const pE = indicesOlhoEsquerdo.map(i => pontos[i]);
-            const pD = indicesOlhoDireito.map(i => pontos[i]);
+            // Separação dos pontos dos olhos usando o módulo geometry.js
+            const pE = INDICES_OLHO_ESQUERDO.map(i => pontos[i]);
+            const pD = INDICES_OLHO_DIREITO.map(i => pontos[i]);
 
             // Cálculo da Distância do Rosto
             const pEsqExterno = pontos[INDEX_OLHO_EXTERNO_ESQ];
             const pDirExterno = pontos[INDEX_OLHO_EXTERNO_DIR];
             const distanciaRostoAtual = calcularDistanciaFace(pEsqExterno, pDirExterno);
 
-            // Verifica regra de postura de 2 minutos
+            // Verifica regra de postura
             verificarPostura(distanciaRostoAtual);
 
             if (pE[5] && pD[5]) {
@@ -186,9 +175,9 @@ async function processarVideo() {
             earDiv.innerText = "EAR: -- | Distância: --";
         }
     }
+
     if (document.hidden) {
         // Quando a aba/janela estiver minimizada ou em segundo plano
-        // Roda via setTimeout (~10 FPS) para não pausar
         setTimeout(processarVideo, 100);
     } else {
         // Quando a janela estiver ativa na tela, mantém fluído a 60 FPS

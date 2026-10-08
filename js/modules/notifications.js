@@ -66,3 +66,11 @@ export function fecharPopup(id) {
         setTimeout(() => toast.remove(), 300);
     }
 }
+
+/**
+ * Fecha múltiplos popups de uma única vez
+ * @param {string[]} ids 
+ */
+export function fecharPopups(ids = []) {
+    ids.forEach(id => fecharPopup(id));
+}

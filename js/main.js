@@ -22,15 +22,14 @@ import { calibrarDistancia, getDistanciaCalibrada, verificarAlertaPostura } from
 import { 
     processarCicloTempo, 
     registrarPiscada, 
-    getHistoricoPiscadas, 
     setLimiteEar, 
     getLimiteEar, 
     alternarPausaSistema, 
     getSistemaPausado 
 } from './modules/blink.js';
-import { tocarAudioRepeticoes } from './modules/audio.js';
+import { carregarAudio, tocarAudioRepeticoes } from './modules/audio.js';
 import { registrarAvisoPostura } from './modules/postureHistory.js';
-import { mostrarPopup, fecharPopup, dispararNotificacaoNativa, solicitarPermissaoNotificacao } from './modules/notifications.js';
+import { mostrarPopup, fecharPopup, fecharPopups, dispararNotificacaoNativa, solicitarPermissaoNotificacao } from './modules/notifications.js';
 import { inicializarSidebar } from './modules/sidebar.js';
 import { inicializarModal } from './modules/modal.js';
 import { alternarPiP } from './modules/pip.js';
@@ -41,7 +40,6 @@ import { alternarPiP } from './modules/pip.js';
 const video = document.getElementById('webcam');
 const canvas = document.getElementById('output');
 const ctx = canvas ? canvas.getContext('2d') : null;
-const containerVideo = document.querySelector('.video-container') || document.querySelector('.camera-wrapper');
 const imgLoading = document.getElementById('img-loading');
 const statusDiv = document.getElementById('status-container');
 const earDiv = document.getElementById('ear-value');
@@ -52,6 +50,9 @@ const telaDescanso = document.getElementById('tela-descanso');
 const contadorDescanso = document.getElementById('contador-descanso');
 
 let detector;
+
+// Popups gerenciados pelo sistema
+const TOASTS_SISTEMA = ['toast-postura', 'toast-postura-grande', 'toast-piscada'];
 
 // ============================================================================
 // 4. CONTROLES DE INTERFACE (Modal, Sidebar & Pausa)
@@ -107,7 +108,7 @@ async function executarCalibracao() {
         const distancia = calcularDistanciaFace(pEsq, pDir);
         calibrarDistancia(distancia);
 
-        // 2. Calibra EAR Médio (68% da abertura atual como limiar de fechamento)
+        // 2. Calibra EAR Médio
         const pE = INDICES_OLHO_ESQUERDO.map(i => pontos[i]);
         const pD = INDICES_OLHO_DIREITO.map(i => pontos[i]);
         const earEsq = calcularEAR(pE[0], pE[1], pE[2], pE[3], pE[4], pE[5]);
@@ -133,7 +134,6 @@ async function executarCalibracao() {
 // 6. PIPELINE DE PROCESSAMENTO DE VÍDEO
 // ============================================================================
 async function processarVideo() {
-    // Garante que o detector e os metadados de vídeo estejam prontos
     if (!detector || !video || video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0 || !ctx) {
         requestAnimationFrame(processarVideo);
         return;
@@ -151,9 +151,7 @@ async function processarVideo() {
             telaDescanso.classList.add('hidden');
         }
         verificarAlertaPostura(0);
-        fecharPopup('toast-postura');
-        fecharPopup('toast-postura-grande');
-        fecharPopup('toast-piscada');
+        fecharPopups(TOASTS_SISTEMA);
 
         if (statusDiv) {
             statusDiv.style.color = "#8e918f";
@@ -195,9 +193,7 @@ async function processarVideo() {
         }
 
         verificarAlertaPostura(0);
-        fecharPopup('toast-postura');
-        fecharPopup('toast-postura-grande');
-        fecharPopup('toast-piscada');
+        fecharPopups(TOASTS_SISTEMA);
 
         if (statusDiv) {
             statusDiv.style.color = "#f28b82";
@@ -337,6 +333,8 @@ async function main() {
     if (loadingText) loadingText.innerText = "Iniciando câmera...";
 
     solicitarPermissaoNotificacao();
+    carregarAudio('./assets/sounds/pertodatela.mp3');
+    carregarAudio('./assets/sounds/piscando.mp3');
 
     try {
         await iniciarCamera(video, canvas, statusDiv);
@@ -351,7 +349,6 @@ async function main() {
             maxFaces: 1
         });
 
-        // Warmup: compilação na GPU
         if (loadingText) loadingText.innerText = "Compilando rede neural na GPU...";
         try {
             await detector.estimateFaces(video);
