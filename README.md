@@ -10,9 +10,10 @@ Uma aplicação web focada em ergonomia digital e saúde ocular para desenvolved
 * **Cálculo de EAR (Eye Aspect Ratio):** Algoritmo geométrico para detecção precisa do fechamento e abertura dos olhos.
 * **Detecção Inteligente de Presença:** Pausa e congela os ciclos de medição quando o usuário não estiver em frente à tela, reiniciando o ciclo de 60s apenas ao retornar.
 * **Monitoramento de Postura & Distância:** Cálculo contínuo da distância interpupilar/facial com alertas graduais para aproximação excessiva.
-* **Calibração Dinâmica:** Calibração com um clique que define tanto a distância base em pixels quanto o limiar personalizado de EAR.
+* **Calibração Dinâmica:** Calibração com um clique que define tanto a distância base em pixels quanto o limiar personalizado de EAR. Usa a mediana de ~20 amostras (imune a piscadas durante a calibração) e fica salva no navegador para as próximas sessões.
 * **Alertas Visuais, Sonoros e Nativos:** Notificações na interface (toasts/banners), alertas em áudio e notificações nativas do navegador via *Notification API*.
-* **Modo Flutuante (Picture-in-Picture):** Suporte a PiP para continuar o acompanhamento da câmera em segundo plano enquanto utiliza outros softwares.
+* **Monitoramento em Segundo Plano:** Continua contando piscadas e checando a postura com a aba oculta ou a janela minimizada, sem precisar do PiP. Um relógio em *Web Worker* contorna o *throttling* de timers do navegador e os quadros são lidos direto da câmera (`ImageCapture`).
+* **Modo Flutuante (Picture-in-Picture):** Opcional, para ver a câmera por cima de outros softwares.
 * **Painel de Métricas & Histórico:** 
   * Gráfico interativo com a evolução do PPM (Chart.js).
   * Registro em memória dos alertas de postura da sessão ativa.

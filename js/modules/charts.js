@@ -1,9 +1,9 @@
-import { getHistoricoPiscadas } from './blink.js';
+import { getHistoricoPiscadas, PISCADAS_MINIMAS_POR_MINUTO } from './blink.js';
 
 let instanciaGrafico = null;
 
 export function renderizarGraficoPiscadas(canvasElement) {
-    if (!canvasElement) return;
+    if (!canvasElement || typeof Chart === 'undefined') return;
 
     const historico = getHistoricoPiscadas();
 
@@ -13,12 +13,12 @@ export function renderizarGraficoPiscadas(canvasElement) {
 
     const labels = historico.map(h => h.horarioFormatado || `Min ${h.minutoIndice}`);
     const dadosPiscadas = historico.map(h => h.piscadas);
-    const dadosMeta = historico.map(h => h.metaMinima || 10);
+    const dadosMeta = historico.map(h => h.metaMinima ?? PISCADAS_MINIMAS_POR_MINUTO);
 
     const ctxGrafico = canvasElement.getContext('2d');
     const gradient = ctxGrafico.createLinearGradient(0, 0, 0, 220);
-    gradient.addColorStop(0, 'rgba(0, 255, 136, 0.35)');
-    gradient.addColorStop(1, 'rgba(0, 255, 136, 0.0)');
+    gradient.addColorStop(0, 'rgba(30, 58, 95, 0.22)');
+    gradient.addColorStop(1, 'rgba(30, 58, 95, 0)');
 
     instanciaGrafico = new Chart(ctxGrafico, {
         type: 'line',
@@ -26,22 +26,22 @@ export function renderizarGraficoPiscadas(canvasElement) {
             labels: labels.length > 0 ? labels : ['Sem dados ainda'],
             datasets: [
                 {
-                    label: 'PPM (Atual)',
+                    label: 'Piscadas por minuto',
                     data: dadosPiscadas.length > 0 ? dadosPiscadas : [0],
-                    borderColor: '#00ff88',
+                    borderColor: '#1e3a5f',
                     backgroundColor: gradient,
                     fill: true,
                     tension: 0.35,
                     borderWidth: 2.5,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: '#00ff88',
-                    pointBorderColor: '#0b132b'
+                    pointBackgroundColor: '#1e3a5f',
+                    pointBorderColor: '#ffffff'
                 },
                 {
-                    label: 'Meta Mínima',
-                    data: dadosMeta.length > 0 ? dadosMeta : [10],
-                    borderColor: '#f72585',
+                    label: 'Meta mínima',
+                    data: dadosMeta.length > 0 ? dadosMeta : [PISCADAS_MINIMAS_POR_MINUTO],
+                    borderColor: '#d64545',
                     borderDash: [5, 5],
                     borderWidth: 1.5,
                     fill: false,
@@ -56,17 +56,17 @@ export function renderizarGraficoPiscadas(canvasElement) {
                 legend: {
                     position: 'top',
                     labels: {
-                        color: '#e0e6ed',
-                        font: { size: 12, family: 'Segoe UI' },
+                        color: '#3e4a5c',
+                        font: { size: 12, family: "'Google Sans Flex', 'Inter Tight', sans-serif" },
                         boxWidth: 12,
                         padding: 12
                     }
                 },
                 tooltip: {
-                    backgroundColor: '#0b132b',
-                    titleColor: '#00ff88',
-                    bodyColor: '#e0e6ed',
-                    borderColor: '#2a3a5e',
+                    backgroundColor: '#ffffff',
+                    titleColor: '#0f172a',
+                    bodyColor: '#3e4a5c',
+                    borderColor: 'rgba(15, 23, 42, 0.12)',
                     borderWidth: 1,
                     padding: 10,
                     cornerRadius: 8
@@ -75,12 +75,12 @@ export function renderizarGraficoPiscadas(canvasElement) {
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { color: '#8d99ae', font: { size: 11 }, maxRotation: 0 }
+                    ticks: { color: '#7a8699', font: { size: 11 }, maxRotation: 0 }
                 },
                 y: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.06)' },
-                    ticks: { color: '#8d99ae', font: { size: 11 }, stepSize: 5 }
+                    grid: { color: 'rgba(15, 23, 42, 0.06)' },
+                    ticks: { color: '#7a8699', font: { size: 11 }, stepSize: 5 }
                 }
             }
         }

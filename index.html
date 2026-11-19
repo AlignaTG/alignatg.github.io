@@ -3,147 +3,471 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Monitor de postura e fadiga ocular que roda 100% no navegador: detecta piscadas e distância da tela com visão computacional, sem enviar vídeo para nenhum servidor.">
+    <meta name="theme-color" content="#eceef2">
     <title>Aligna — Monitor de Postura & Fadiga Ocular</title>
+    <link rel="icon" type="image/svg+xml" href="assets/image/logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400..700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+    <!-- Esconde os elementos animados só quando há JS (sem JS, nada some) -->
+    <script>document.documentElement.classList.add("js-reveal");</script>
     <link rel="stylesheet" href="assets/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 
 <body>
 
+    <!-- Fundo vivo: auroras que se movem com a rolagem, pontos e granulado -->
+    <div class="page-ground" aria-hidden="true">
+        <span class="pg-blob pg-blob-a"></span>
+        <span class="pg-blob pg-blob-b"></span>
+        <span class="pg-blob pg-blob-c"></span>
+        <span class="pg-dots"></span>
+        <span class="pg-grain"></span>
+    </div>
+
     <!-- Overlay de Inicialização -->
     <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-card">
-            <img src="assets/image/correctposturedark.png" alt="Guia de Postura" class="loading-guide-img">
-            <div class="spinner"></div>
-            <p id="loadingText" class="loading-text">Iniciando câmera...</p>
+        <div class="loading-card window">
+            <div class="window-bar">
+                <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="window-title">aligna / iniciando</span>
+            </div>
+            <div class="loading-body">
+                <img src="assets/image/postura-ideal.svg" alt="Guia de postura correta em frente ao computador" class="loading-guide-img">
+                <ol class="guia-lista guia-lista-compacta">
+                    <li><span class="guia-num">1</span>Olhos na altura do topo do monitor</li>
+                    <li><span class="guia-num">2</span>Tela a um braço (50–70 cm)</li>
+                    <li><span class="guia-num">3</span>Pescoço neutro</li>
+                    <li><span class="guia-num">4</span>Costas apoiadas</li>
+                    <li><span class="guia-num">5</span>Pulsos retos e apoiados</li>
+                    <li><span class="guia-num">6</span>Pés no chão</li>
+                </ol>
+                <p class="guia-dica guia-dica-compacta">Ao calibrar, sente-se assim e olhe para a parte de baixo do site.</p>
+                <div class="spinner"></div>
+                <p id="loadingText" class="loading-text">Iniciando câmera...</p>
+            </div>
         </div>
     </div>
 
     <!-- Barra de Navegação -->
-    <header class="navbar">
-        <div class="brand">
-            <img src="assets/image/logo.svg" alt="Logo Aligna" class="brand-logo">
-            <span class="brand-name">Aligna</span>
-        </div>
+    <header class="navbar-wrap">
+        <nav class="navbar">
+            <a href="#topo" class="brand" aria-label="Aligna — início">
+                <img src="assets/image/logo.svg" alt="" class="brand-logo">
+                <span class="brand-name">Aligna</span>
+            </a>
 
-        <div class="nav-actions">
-            <button id="btn-menu-sidebar" class="btn-menu" aria-label="Abrir Menu">
-                <img src="assets/image/line.svg" alt="Menu" class="icon-svg">
-            </button>
-        </div>
+            <div class="nav-links">
+                <a href="#topo" class="nav-link active">Monitor</a>
+                <a href="#postura" class="nav-link">Postura</a>
+                <button type="button" class="nav-link" data-acao="historico">Histórico</button>
+                <a href="#como-funciona" class="nav-link">Como funciona</a>
+            </div>
+
+            <div class="nav-actions">
+                <span class="privacy-chip" title="Nenhum frame de vídeo sai do seu computador">
+                    <span class="pulse-dot"></span> 100% local
+                </span>
+                <button id="btn-menu-sidebar" class="btn-icon" aria-label="Abrir menu de ferramentas">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+                </button>
+            </div>
+        </nav>
     </header>
 
     <!-- Conteúdo Principal -->
-    <main class="main-container">
-        <div class="hero-text">
-            <h1>Monitor de Postura & Fadiga Ocular</h1>
-            <div id="status-container" class="status-indicator">Iniciando sistema...</div>
-        </div>
+    <main id="topo" class="main-container">
+        <section class="hero hero-enter sd-exit">
+            <a href="#como-funciona" class="pill-badge">
+                <span class="pill-badge-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>
+                </span>
+                <span><b>Visão computacional</b> rodando direto no seu navegador</span>
+                <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
 
-        <div class="camera-wrapper">
-            <div class="video-container">
-                <img id="img-loading" src="assets/image/correctposturedark.png" alt="Instrução de postura correta" class="loading-guide-img hidden">
-                <video id="webcam" playsinline muted></video>
-                <canvas id="output"></canvas>
+            <h1 class="hero-title">Postura &amp;<br><span class="accent">fadiga ocular.</span></h1>
+            <p class="hero-lead">Monitora suas piscadas por minuto e a distância da tela em tempo real, e avisa antes que o cansaço apareça.</p>
+
+            <div class="status-pill" data-estado="carregando">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span id="status-container" role="status" aria-live="polite">Iniciando sistema...</span>
             </div>
-        </div>
 
-        <!-- Controles de Postura, Calibração, Pausa e Histórico -->
-        <div class="controls-panel">
-            <button id="btn-calibrar" class="btn btn-primary">Calibrar Distância Ideal (Foto)</button>
-            <button id="btn-pausa" class="btn btn-secondary">Pausar Sistema</button>
-            <div id="distancia-calibrada" class="badge-calibrada">Distância base: Não definida</div>
-        </div>
-
-        <div id="ear-value" class="telemetry-bar">EAR: -- | Distância: -- | Ciclo: 60s</div>
-
-        <!-- Tela de Descanso Obrigatória (30s) -->
-        <div id="tela-descanso" class="tela-descanso hidden">
-            <div class="descanso-content">
-                <h2>Pausa para Descanso Visual</h2>
-                <p>Você ficou abaixo da meta de piscadas em dois ciclos consecutivos.</p>
-                <p>Feche os olhos e descanse a vista por:</p>
-                <div id="contador-descanso" class="contador-descanso">30s</div>
+            <!-- Controles de Postura, Calibração e Pausa -->
+            <div class="controls-panel">
+                <button id="btn-calibrar" class="btn btn-primary">
+                    Calibrar postura ideal
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button id="btn-pausa" class="btn btn-secondary">
+                    <span class="btn-pausa-texto">Pausar sistema</span>
+                </button>
             </div>
-        </div>
+
+            <!-- Métricas -->
+            <div class="metrics" aria-label="Métricas em tempo real">
+                <div class="metric">
+                    <span class="metric-label">Minuto atual</span>
+                    <span class="metric-value"><span id="metrica-piscadas">0</span><small>piscadas</small></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Último minuto</span>
+                    <span class="metric-value"><span id="metrica-ppm">--</span><small>PPM</small></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Ciclo</span>
+                    <span class="metric-value"><span id="metrica-ciclo">60</span><small>s</small></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Distância</span>
+                    <span class="metric-value"><span id="metrica-distancia">--</span><small id="metrica-distancia-unidade">px</small></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Janela da Câmera -->
+        <section class="camera-window window camera-enter sd-parallax" aria-label="Câmera ao vivo">
+            <div class="window-bar">
+                <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="window-title">aligna / camera / <b>ao-vivo</b></span>
+                <span class="window-meta">facemesh · gpu</span>
+            </div>
+
+            <div class="camera-wrapper">
+                <div class="video-container">
+                    <img id="img-loading" src="assets/image/postura-ideal.svg" alt="Instrução de postura correta" class="loading-guide-img hidden">
+                    <video id="webcam" playsinline muted></video>
+                    <canvas id="output"></canvas>
+                </div>
+            </div>
+
+            <div class="window-footer">
+                <span id="ear-value" class="telemetry-bar">// aguardando câmera</span>
+                <span id="distancia-calibrada" class="badge-calibrada">base: não calibrada</span>
+            </div>
+        </section>
     </main>
 
+    <!-- Guia de postura -->
+    <section id="postura" class="postura">
+        <div class="section-head" data-enter-group>
+        <div class="section-eyebrow">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2"/><path d="M12 7v7M8 10h8M9 21l3-7 3 7"/></svg>
+            Guia de postura
+        </div>
+        <h2 class="section-title section-title-com-sub">Como sentar em frente à tela.</h2>
+        <p class="section-sub">Calibre o Aligna já nesta posição: ela vira a referência de todos os avisos de distância.</p>
+        </div>
+
+        <div class="guia-card sd-rise">
+            <div class="guia-figura">
+                <img src="assets/image/postura-ideal.svg" alt="Ilustração de uma pessoa sentada com a postura ideal em frente ao computador, com seis pontos numerados" loading="lazy">
+            </div>
+            <div class="guia-info">
+                <ol class="guia-lista">
+                    <li><span class="guia-num">1</span><div><b>Olhos na altura do topo do monitor</b><span>A tela fica levemente abaixo da linha dos olhos.</span></div></li>
+                    <li><span class="guia-num">2</span><div><b>Tela a um braço de distância</b><span>Cerca de 50 a 70 cm entre os olhos e o monitor.</span></div></li>
+                    <li><span class="guia-num">3</span><div><b>Pescoço neutro</b><span>Cabeça alinhada aos ombros, olhando para a frente.</span></div></li>
+                    <li><span class="guia-num">4</span><div><b>Costas apoiadas</b><span>Lombar encostada na cadeira, sem curvar os ombros.</span></div></li>
+                    <li><span class="guia-num">5</span><div><b>Cotovelos a 90° e pulsos retos</b><span>Antebraços apoiados na mesa, na altura do teclado.</span></div></li>
+                    <li><span class="guia-num">6</span><div><b>Pés no chão</b><span>Joelhos dobrados em ângulo reto; use um apoio se precisar.</span></div></li>
+                </ol>
+                <p class="guia-dica">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>
+                    <span><b>Dica:</b> na hora de calibrar, olhe para a parte de baixo do site, onde você costuma ler.</span>
+                </p>
+            </div>
+        </div>
+
+        <h3 class="exemplos-titulo" data-enter>Exemplos de posição</h3>
+        <div class="exemplos-grid" data-enter-group>
+            <!-- Certo -->
+            <article class="exemplo">
+                <div class="exemplo-figura">
+                    <span class="exemplo-badge certo">✓ Certo</span>
+                    <svg viewBox="0 0 240 170" role="img" aria-label="Pessoa sentada ereta, a um braço do monitor">
+                        <use href="#cena-base"/><use href="#monitor-normal"/>
+                        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M64 113 H106 V150" stroke="#2c5282" stroke-width="10"/>
+                            <path d="M104 155 H120" stroke="#0f172a" stroke-width="6"/>
+                            <path d="M60 112 L64 74" stroke="#1e3a5f" stroke-width="17"/>
+                            <path d="M66 78 L70 96 L126 95" stroke="#4a6fa5" stroke-width="7"/>
+                            <path d="M82 58 H172" stroke="#1e3a5f" stroke-width="1.3" stroke-dasharray="3 3"/>
+                        </g>
+                        <circle cx="68" cy="60" r="11" fill="#1e3a5f"/><circle cx="75" cy="58" r="1.6" fill="#fff"/>
+                        <circle cx="129" cy="95" r="3.5" fill="#4a6fa5"/>
+                    </svg>
+                </div>
+                <div class="exemplo-corpo">
+                    <h4>Postura ideal</h4>
+                    <p>Costas apoiadas, olhos na altura do topo da tela e um braço de distância.</p>
+                </div>
+            </article>
+
+            <!-- Muito perto -->
+            <article class="exemplo">
+                <div class="exemplo-figura">
+                    <span class="exemplo-badge errado">✕ Evite</span>
+                    <svg viewBox="0 0 240 170" role="img" aria-label="Pessoa inclinada para a frente, com o rosto muito perto do monitor">
+                        <use href="#cena-base"/><use href="#monitor-normal"/>
+                        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M66 113 H106 V150" stroke="#2c5282" stroke-width="10"/>
+                            <path d="M104 155 H120" stroke="#0f172a" stroke-width="6"/>
+                            <path d="M62 112 L98 78" stroke="#1e3a5f" stroke-width="17"/>
+                            <path d="M98 82 L108 98 L136 95" stroke="#4a6fa5" stroke-width="7"/>
+                            <path d="M126 42 V50 M172 42 V50 M126 46 H172" stroke="#d64545" stroke-width="1.6"/>
+                        </g>
+                        <circle cx="112" cy="64" r="11" fill="#1e3a5f"/><circle cx="119" cy="62" r="1.6" fill="#fff"/>
+                        <circle cx="139" cy="95" r="3.5" fill="#4a6fa5"/>
+                    </svg>
+                </div>
+                <div class="exemplo-corpo">
+                    <h4>Muito perto da tela</h4>
+                    <p>Inclinar o tronco em direção ao monitor. É isso que o Aligna detecta e avisa.</p>
+                </div>
+            </article>
+
+            <!-- Pescoço projetado -->
+            <article class="exemplo">
+                <div class="exemplo-figura">
+                    <span class="exemplo-badge errado">✕ Evite</span>
+                    <svg viewBox="0 0 240 170" role="img" aria-label="Pessoa com as costas curvadas e a cabeça projetada para a frente">
+                        <use href="#cena-base"/><use href="#monitor-normal"/>
+                        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M64 113 H106 V150" stroke="#2c5282" stroke-width="10"/>
+                            <path d="M104 155 H120" stroke="#0f172a" stroke-width="6"/>
+                            <path d="M58 112 Q57 84 80 72" stroke="#1e3a5f" stroke-width="17"/>
+                            <path d="M80 77 L92 97 L126 95" stroke="#4a6fa5" stroke-width="7"/>
+                            <circle cx="92" cy="70" r="21" stroke="#d64545" stroke-width="1.6" stroke-dasharray="3 3"/>
+                        </g>
+                        <circle cx="99" cy="72" r="11" fill="#1e3a5f"/><circle cx="106" cy="71" r="1.6" fill="#fff"/>
+                        <circle cx="129" cy="95" r="3.5" fill="#4a6fa5"/>
+                    </svg>
+                </div>
+                <div class="exemplo-corpo">
+                    <h4>Pescoço projetado</h4>
+                    <p>Costas curvadas e cabeça à frente dos ombros sobrecarregam a cervical.</p>
+                </div>
+            </article>
+
+            <!-- Monitor baixo -->
+            <article class="exemplo">
+                <div class="exemplo-figura">
+                    <span class="exemplo-badge errado">✕ Evite</span>
+                    <svg viewBox="0 0 240 170" role="img" aria-label="Monitor baixo demais, obrigando a pessoa a olhar para baixo">
+                        <use href="#cena-base"/>
+                        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M168 99 H192" stroke="#0f172a" stroke-width="2.5"/>
+                            <path d="M64 113 H106 V150" stroke="#2c5282" stroke-width="10"/>
+                            <path d="M104 155 H120" stroke="#0f172a" stroke-width="6"/>
+                            <path d="M60 112 L68 75" stroke="#1e3a5f" stroke-width="17"/>
+                            <path d="M70 79 L74 96 L126 95" stroke="#4a6fa5" stroke-width="7"/>
+                            <path d="M86 68 L173 86" stroke="#d64545" stroke-width="1.4" stroke-dasharray="3 3"/>
+                        </g>
+                        <rect x="176" y="74" width="7" height="24" rx="2" fill="#0f172a"/>
+                        <path d="M175.5 77 V95" stroke="#6f9be0" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="77" cy="63" r="11" fill="#1e3a5f"/><circle cx="83" cy="66" r="1.6" fill="#fff"/>
+                        <circle cx="129" cy="95" r="3.5" fill="#4a6fa5"/>
+                    </svg>
+                </div>
+                <div class="exemplo-corpo">
+                    <h4>Monitor baixo demais</h4>
+                    <p>Olhar para baixo o tempo todo inclina o pescoço. Eleve a tela ou o notebook.</p>
+                </div>
+            </article>
+        </div>
+
+        <!-- Elementos reaproveitados pelas ilustrações de exemplo -->
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+            <symbol id="cena-base" viewBox="0 0 240 170">
+                <rect x="0" y="158" width="240" height="12" fill="#e2e8f0"/>
+                <g stroke="#b6c1d1" stroke-linecap="round" fill="none">
+                    <path d="M38 70 L43 112" stroke-width="8"/>
+                    <path d="M42 118 H92" stroke-width="6"/>
+                    <path d="M66 122 V146" stroke-width="4"/>
+                    <path d="M50 150 H84" stroke-width="4"/>
+                    <path d="M214 105 V156" stroke-width="5"/>
+                </g>
+                <circle cx="50" cy="154" r="3" fill="#b6c1d1"/>
+                <circle cx="84" cy="154" r="3" fill="#b6c1d1"/>
+                <rect x="118" y="100" width="112" height="5" rx="2.5" fill="#cfd7e2"/>
+                <rect x="128" y="96" width="22" height="4" rx="1.5" fill="#8fa3bf"/>
+            </symbol>
+            <symbol id="monitor-normal" viewBox="0 0 240 170">
+                <path d="M168 99 H192" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M180 99 V88" stroke="#0f172a" stroke-width="3"/>
+                <rect x="176" y="50" width="7" height="40" rx="2" fill="#0f172a"/>
+                <path d="M175.5 54 V86" stroke="#6f9be0" stroke-width="1.5" stroke-linecap="round"/>
+            </symbol>
+        </svg>
+    </section>
+
+    <!-- Como funciona -->
+    <section id="como-funciona" class="faq">
+        <div class="section-head" data-enter-group>
+        <div class="section-eyebrow">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+            Perguntas rápidas
+        </div>
+        <h2 class="section-title">Como o Aligna funciona.</h2>
+        </div>
+
+        <div class="faq-grid sd-rise">
+            <div class="faq-item">
+                <h3>Como ele sabe que eu pisquei?</h3>
+                <p>Uma malha de 478 pontos é detectada no seu rosto. A razão entre altura e largura do olho (EAR) cai quando a pálpebra fecha, e só conta como piscada se durar entre 80 e 450 ms.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Por que piscar importa?</h3>
+                <p>Em frente à tela piscamos bem menos, o que resseca os olhos. Abaixo de 6 piscadas por minuto em dois ciclos seguidos, o Aligna pede uma pausa de 20 segundos.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Como a distância é medida?</h3>
+                <p>Na calibração ele guarda a distância entre os cantos dos seus olhos. Se você se aproximar 15% além disso, os avisos começam, ficando mais insistentes a cada 30 segundos.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Meu vídeo sai do computador?</h3>
+                <p>Não. Todo o processamento roda na GPU do seu navegador com TensorFlow.js. Só a calibração fica salva localmente, para você não precisar repetir.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tela de Descanso Obrigatória (20s — regra 20-20-20) -->
+    <div id="tela-descanso" class="tela-descanso hidden">
+        <div class="descanso-content window">
+            <div class="window-bar">
+                <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="window-title">aligna / descanso</span>
+            </div>
+            <div class="descanso-body">
+                <h2>Pausa para <span class="accent">descanso visual</span></h2>
+                <p>Você ficou abaixo da meta de piscadas em dois ciclos consecutivos.</p>
+                <p>Feche os olhos ou olhe para algo distante por:</p>
+                <div id="contador-descanso" class="contador-descanso">20s</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Container de Notificações / Pop-ups Flutuantes -->
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container" aria-live="assertive"></div>
 
     <!-- Rodapé -->
     <footer class="app-footer">
-        <div class="footer-copy">
-            <span>© 2026 João Latczuk</span>
-            <span class="footer-separator">•</span>
-            <span>Código aberto sob licença <a href="#">MIT</a></span>
-            <span class="footer-version">v1.1.0</span>
+        <div class="footer-inner">
+            <div class="footer-grid" data-enter-group>
+                <div class="footer-about">
+                    <div class="footer-brand">
+                        <img src="assets/image/logo.svg" alt="" class="footer-logo">
+                        <span>Aligna</span>
+                    </div>
+                    <p>Monitor de postura e fadiga ocular com visão computacional, feito para quem passa o dia em frente à tela.</p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Ferramentas</h4>
+                    <button type="button" data-acao="calibrar">Calibrar postura</button>
+                    <button type="button" data-acao="historico">Histórico</button>
+                    <button type="button" data-acao="pip">Modo flutuante</button>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Projeto</h4>
+                    <a href="#postura">Guia de postura</a>
+                    <a href="#como-funciona">Como funciona</a>
+                    <a href="https://github.com/AlignaTG/alignatg.github.io" target="_blank" rel="noopener">Código no GitHub</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom" data-enter>
+                <span>© 2026 João Vinicius Latczuk. Código aberto.</span>
+                <div class="footer-bottom-right">
+                    <span>Feito com TensorFlow.js e Chart.js.</span>
+                    <span class="footer-version">v1.2.0</span>
+                    <a href="#topo" class="btn-icon btn-icon-dark" aria-label="Voltar ao topo">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+                    </a>
+                </div>
+            </div>
         </div>
+        <div class="footer-glow sd-glow" aria-hidden="true"></div>
+        <div class="footer-wordmark sd-wordmark" aria-hidden="true">Latczuk</div>
     </footer>
 
     <!-- Backdrop da Sidebar -->
     <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
     <!-- Sidebar / Drawer de Ferramentas -->
-    <aside id="sidebar-menu" class="sidebar">
+    <aside id="sidebar-menu" class="sidebar" aria-label="Menu de Ferramentas">
         <div class="sidebar-header">
-            <h3>Menu de Ferramentas</h3>
-            <button id="btn-fechar-sidebar" class="sidebar-close" aria-label="Fechar">
-                <img src="assets/image/close.svg" alt="Fechar" class="icon-svg">
+            <span class="window-title">aligna / <b>ferramentas</b></span>
+            <button id="btn-fechar-sidebar" class="btn-icon" aria-label="Fechar menu">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
         </div>
 
         <div class="sidebar-content">
             <div id="sidebar-item-calibrar" class="sidebar-item-container hidden">
                 <button id="btn-sidebar-calibrar" class="btn-sidebar">
-                    <img src="assets/image/camera.svg" alt="Câmera" class="icon-svg">
-                    <span>Recalibrar Distância</span>
+                    <span class="btn-sidebar-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg></span>
+                    <span class="btn-sidebar-text"><b>Recalibrar postura</b><small>Nova distância base e limiar de EAR</small></span>
                 </button>
             </div>
 
             <button id="btn-sidebar-historico" class="btn-sidebar">
-                <img src="assets/image/line-chart.svg" alt="Gráfico" class="icon-svg">
-                <span>Ver Históricos</span>
+                <span class="btn-sidebar-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16M8 15l4-4 3 3 5-6"/></svg></span>
+                <span class="btn-sidebar-text"><b>Histórico</b><small>Gráfico de PPM e avisos de postura</small></span>
             </button>
 
             <button id="btn-sidebar-pip" class="btn-sidebar">
-                <img src="assets/image/pip.svg" alt="PiP" class="icon-svg">
-                <span>Modo Flutuante (PiP)</span>
+                <span class="btn-sidebar-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="6" rx="1"/></svg></span>
+                <span class="btn-sidebar-text"><b>Modo flutuante</b><small>Veja a câmera por cima de outras janelas</small></span>
             </button>
         </div>
+
+        <p class="sidebar-hint">Esc fecha</p>
     </aside>
 
     <!-- Modal de Histórico e Avisos -->
     <div id="modal-historico" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-tabs">
-                    <button id="tab-btn-piscadas" class="tab-btn active">Piscadas (PPM)</button>
-                    <button id="tab-btn-postura" class="tab-btn">Avisos de Postura</button>
-                </div>
-                <button id="btn-fechar-modal" class="modal-close" aria-label="Fechar">
-                    <img src="assets/image/close.svg" alt="Fechar" class="icon-svg">
+        <div class="modal-content window" role="dialog" aria-modal="true" aria-label="Histórico de piscadas e avisos">
+            <div class="window-bar">
+                <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="window-title">aligna / <b>historico</b></span>
+                <button id="btn-fechar-modal" class="btn-icon btn-icon-sm" aria-label="Fechar histórico">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
                 </button>
             </div>
 
-            <div id="tab-conteudo-piscadas" class="tab-pane active">
-                <div class="chart-container">
-                    <canvas id="grafico-piscadas"></canvas>
+            <div class="modal-body">
+                <div class="modal-tabs" role="tablist">
+                    <button id="tab-btn-piscadas" class="tab-btn active" role="tab">Piscadas (PPM)</button>
+                    <button id="tab-btn-postura" class="tab-btn" role="tab">Avisos de postura</button>
                 </div>
-            </div>
 
-            <div id="tab-conteudo-postura" class="tab-pane">
-                <div class="lista-avisos-header">
-                    <span>Registros de Proximidade contínua</span>
-                    <button id="btn-limpar-avisos" class="btn-link">Limpar Histórico</button>
+                <div id="tab-conteudo-piscadas" class="tab-pane active">
+                    <div class="chart-container">
+                        <canvas id="grafico-piscadas"></canvas>
+                    </div>
                 </div>
-                <ul id="lista-avisos-postura" class="lista-avisos"></ul>
+
+                <div id="tab-conteudo-postura" class="tab-pane">
+                    <div class="lista-avisos-header">
+                        <span>Registros de proximidade contínua</span>
+                        <button id="btn-limpar-avisos" class="btn-link">Limpar histórico</button>
+                    </div>
+                    <ul id="lista-avisos-postura" class="lista-avisos"></ul>
+                </div>
             </div>
         </div>
     </div>
 
     <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/modules/reveal.js"></script>
 </body>
 
 </html>

@@ -1,10 +1,22 @@
 // js/modules/audio.js
 
+// O AudioContext real só é criado após um gesto do usuário (política de autoplay
+// dos navegadores). A decodificação usa um OfflineAudioContext, que não toca som
+// e por isso pode ser criado a qualquer momento — AudioBuffers servem em qualquer contexto.
 let audioCtx = null;
+let ctxDecodificacao = null;
 const audioBuffers = new Map();
 
+function criarContextoDecodificacao() {
+    if (!ctxDecodificacao) {
+        const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        ctxDecodificacao = new Offline(1, 1, 44100);
+    }
+    return ctxDecodificacao;
+}
+
 /**
- * Destrava o motor de áudio. DEVE ser chamada em um evento de toque/clique.
+ * Cria/destrava o motor de áudio. DEVE ser chamada em um evento de toque/clique.
  */
 export async function destravarAudioMobile() {
     if (!audioCtx) {
@@ -15,19 +27,23 @@ export async function destravarAudioMobile() {
     }
 }
 
+// Destrava automaticamente no primeiro clique/toque/tecla.
+['pointerdown', 'keydown', 'touchstart'].forEach(evento => {
+    window.addEventListener(evento, () => {
+        destravarAudioMobile().catch(() => {});
+    }, { once: true, passive: true });
+});
+
 /**
  * Faz o pré-carregamento dos arquivos .mp3 na memória
  */
 export async function carregarAudio(caminhoAudio) {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
     if (audioBuffers.has(caminhoAudio)) return;
 
     try {
         const resposta = await fetch(caminhoAudio);
         const arrayBuffer = await resposta.arrayBuffer();
-        const bufferDecodificado = await audioCtx.decodeAudioData(arrayBuffer);
+        const bufferDecodificado = await criarContextoDecodificacao().decodeAudioData(arrayBuffer);
         audioBuffers.set(caminhoAudio, bufferDecodificado);
     } catch (erro) {
         console.warn(`Erro ao carregar áudio: ${caminhoAudio}`, erro);
@@ -39,7 +55,7 @@ export async function carregarAudio(caminhoAudio) {
  */
 export function tocarAudioRepeticoes(caminhoAudio, repeticoes = 3) {
     if (!audioCtx || !audioBuffers.has(caminhoAudio)) {
-        // Fallback para HTML5 Audio caso o buffer não esteja pronto
+        // Sem gesto ainda (ou buffer não pronto): tenta via HTML5 Audio
         tocarFallbackAudio(caminhoAudio, repeticoes);
         return;
     }
@@ -68,7 +84,7 @@ function tocarFallbackAudio(caminhoAudio, repeticoes) {
         if (contagem < repeticoes) {
             contagem++;
             audio.currentTime = 0;
-            audio.play().catch(e => console.warn("Fallback bloqueado:", e));
+            audio.play().catch(e => console.warn("Áudio bloqueado até o primeiro clique na página:", e.name));
         }
     }
 

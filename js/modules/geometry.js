@@ -6,7 +6,8 @@ export const INDICES_OLHO_ESQUERDO = [33, 160, 158, 133, 153, 144];
 export const INDICES_OLHO_DIREITO = [362, 385, 387, 263, 373, 380];
 
 /**
- * Calcula a razão de aspecto do olho (Eye Aspect Ratio - EAR)
+ * EAR (Eye Aspect Ratio / Razão de Aspecto do Olho)
+ * É a fórmula matemática padrão utilizada em visão computacional para medir o quão aberto ou fechado um olho está.
  */
 export function calcularEAR(p1, p2, p3, p4, p5, p6) {
     const dVert1 = Math.hypot(p2.x - p6.x, p2.y - p6.y);
@@ -16,7 +17,7 @@ export function calcularEAR(p1, p2, p3, p4, p5, p6) {
 }
 
 /**
- * Calcula a distância euclidiana entre dois pontos faciais (em pixels)
+ * Calcula a distância euclidiana entre dois pontos faciais (em pixels) ( Para verificar a distancia da pessoa da tela ).
  */
 export function calcularDistanciaFace(pEsq, pDir) {
     return Math.hypot(pDir.x - pEsq.x, pDir.y - pEsq.y);

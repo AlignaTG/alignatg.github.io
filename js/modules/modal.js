@@ -54,6 +54,11 @@ export function inicializarModal() {
     window.addEventListener('click', (e) => {
         if (e.target === modalHistorico) fecharModal();
     });
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modalHistorico && !modalHistorico.classList.contains('hidden')) {
+            fecharModal();
+        }
+    });
 
     return { abrirModal, fecharModal };
 }

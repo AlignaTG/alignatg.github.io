@@ -12,7 +12,6 @@ export function inicializarSidebar({ onCalibrar, onHistorico, onPip } = {}) {
     const btnSidebarCalibrar = document.getElementById('btn-sidebar-calibrar');
     const btnSidebarHistorico = document.getElementById('btn-sidebar-historico');
     const btnSidebarPip = document.getElementById('btn-sidebar-pip');
-    const btnCalibrarPrincipal = document.getElementById('btn-calibrar');
 
     function abrirSidebar() {
         if (sidebar && backdrop) {
@@ -44,6 +43,12 @@ export function inicializarSidebar({ onCalibrar, onHistorico, onPip } = {}) {
         backdrop.addEventListener('click', fecharSidebar);
     }
 
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) {
+            fecharSidebar();
+        }
+    });
+
     // 📍 Ações dos Botões Internos
     if (btnSidebarCalibrar && onCalibrar) {
         btnSidebarCalibrar.addEventListener('click', () => {
@@ -66,10 +71,8 @@ export function inicializarSidebar({ onCalibrar, onHistorico, onPip } = {}) {
         });
     }
 
+    // O botão principal continua visível (vira "Recalibrar"); o atalho também aparece no menu
     function moverCalibracaoParaSidebar() {
-        if (btnCalibrarPrincipal) {
-            btnCalibrarPrincipal.classList.add('hidden');
-        }
         if (itemCalibrarContainer) {
             itemCalibrarContainer.classList.remove('hidden');
         }

@@ -27,17 +27,25 @@ export function dispararNotificacaoNativa(titulo, corpo) {
 export function mostrarPopup(id, mensagem, tipo, duracaoAutoFechar = null) {
     let toast = document.getElementById(id);
 
+    // Se o toast estava saindo, cancela a remoção e reaproveita o elemento
+    if (toast && toast.timerRemocao) {
+        clearTimeout(toast.timerRemocao);
+        toast.timerRemocao = null;
+        toast.classList.add('show');
+    }
+
     if (!toast) {
         toast = document.createElement('div');
         toast.id = id;
         toast.className = `toast ${tipo}`;
-        
+
         const texto = document.createElement('span');
         texto.className = 'toast-texto';
         texto.innerHTML = mensagem;
-        
+
         const btnFechar = document.createElement('button');
         btnFechar.className = 'toast-fechar';
+        btnFechar.setAttribute('aria-label', 'Fechar aviso');
         btnFechar.innerHTML = '&times;';
         btnFechar.onclick = () => fecharPopup(id);
 
@@ -61,15 +69,20 @@ export function mostrarPopup(id, mensagem, tipo, duracaoAutoFechar = null) {
 
 export function fecharPopup(id) {
     const toast = document.getElementById(id);
-    if (toast) {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
+    // Evita agendar várias remoções quando chamado a cada frame
+    if (!toast || toast.timerRemocao) return;
+
+    if (toast.timerAutoFechar) {
+        clearTimeout(toast.timerAutoFechar);
+        toast.timerAutoFechar = null;
     }
+    toast.classList.remove('show');
+    toast.timerRemocao = setTimeout(() => toast.remove(), 300);
 }
 
 /**
  * Fecha múltiplos popups de uma única vez
- * @param {string[]} ids 
+ * @param {string[]} ids
  */
 export function fecharPopups(ids = []) {
     ids.forEach(id => fecharPopup(id));

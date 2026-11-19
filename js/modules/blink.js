@@ -183,7 +183,8 @@ export function processarCicloTempo(usuarioPresente = false) {
         piscadasUltimoMinuto,
         alertaAtivo: alertaPiscadaAtivo,
         novoAlertaDisparado,
-        modoDescanso: false
+        modoDescanso: false,
+        minutosCompletos: historicoPiscadas.length
     };
 }
 

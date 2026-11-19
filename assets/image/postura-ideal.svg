@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" aria-labelledby="titulo desc">
+  <title id="titulo">Postura ideal em frente ao computador</title>
+  <desc id="desc">Pessoa sentada com as costas apoiadas, olhos na altura do topo do monitor, a cerca de um braço da tela, cotovelos a 90 graus, pulsos retos e pés no chão.</desc>
+  <defs>
+    <clipPath id="moldura"><rect width="760" height="520" rx="28"/></clipPath>
+    <style>
+      .marcador circle { fill: #1e3a5f; stroke: #ffffff; stroke-width: 3; }
+      .marcador text { fill: #ffffff; font: 700 15px 'Inter Tight', 'Segoe UI', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; }
+      .guia { stroke: #1e3a5f; stroke-width: 2; stroke-dasharray: 2 5; stroke-linecap: round; fill: none; }
+      .rotulo { fill: #1e3a5f; font: 600 17px 'Inter Tight', 'Segoe UI', system-ui, sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <g clip-path="url(#moldura)">
+    <!-- Fundo -->
+    <rect width="760" height="520" fill="#f1f4f8"/>
+    <circle cx="560" cy="200" r="150" fill="#e6ecf5"/>
+    <rect x="0" y="480" width="760" height="40" fill="#e2e8f0"/>
+
+    <!-- Planta -->
+    <path d="M716 440 C698 420 692 396 699 368 C714 390 721 414 716 440Z" fill="#8ea7c8"/>
+    <path d="M716 440 C730 416 742 400 750 380 C754 408 740 430 716 440Z" fill="#a9bcd6"/>
+    <path d="M716 440 C708 420 712 396 724 380 C728 404 724 424 716 440Z" fill="#7d97bb"/>
+    <path d="M698 440 H734 L729 480 H703 Z" fill="#c3cddb"/>
+
+    <!-- Cadeira -->
+    <g stroke="#b6c1d1" stroke-linecap="round" fill="none">
+      <path d="M178 212 L192 342" stroke-width="18"/>
+      <path d="M186 352 H332" stroke-width="16"/>
+      <path d="M258 360 V440" stroke-width="10"/>
+      <path d="M206 448 H310" stroke-width="10"/>
+    </g>
+    <circle cx="206" cy="470" r="9" fill="#b6c1d1"/>
+    <circle cx="310" cy="470" r="9" fill="#b6c1d1"/>
+
+    <!-- Mesa -->
+    <path d="M652 308 V476" stroke="#b6c1d1" stroke-width="14" stroke-linecap="round"/>
+    <rect x="376" y="296" width="300" height="12" rx="6" fill="#cfd7e2"/>
+    <rect x="398" y="288" width="64" height="8" rx="3" fill="#8fa3bf"/>
+
+    <!-- Monitor + webcam -->
+    <path d="M520 294 H584" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
+    <path d="M552 294 V250" stroke="#0f172a" stroke-width="8"/>
+    <rect x="542" y="150" width="18" height="102" rx="5" fill="#0f172a"/>
+    <path d="M539 158 V244" stroke="#6f9be0" stroke-width="3" stroke-linecap="round"/>
+    <rect x="545" y="141" width="12" height="9" rx="2" fill="#0f172a"/>
+    <circle cx="551" cy="145.5" r="2" fill="#28c840"/>
+
+    <!-- Pessoa -->
+    <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M232 334 H352 V462" stroke="#2c5282" stroke-width="28"/>
+      <path d="M346 470 H394" stroke="#0f172a" stroke-width="16"/>
+      <path d="M226 332 L238 214" stroke="#1e3a5f" stroke-width="46"/>
+      <path d="M242 202 L241 186" stroke="#1e3a5f" stroke-width="18"/>
+      <path d="M244 222 L252 288 L400 284" stroke="#4a6fa5" stroke-width="20"/>
+    </g>
+    <circle cx="250" cy="160" r="30" fill="#1e3a5f"/>
+    <circle cx="268" cy="154" r="4" fill="#ffffff"/>
+    <circle cx="410" cy="283" r="9" fill="#4a6fa5"/>
+
+    <!-- Linha dos olhos até o topo do monitor -->
+    <path d="M286 152 H536" stroke="#2c5282" stroke-width="2" stroke-dasharray="6 6"/>
+
+    <!-- Distância até a tela -->
+    <path d="M268 104 H551 M268 96 V112 M551 96 V112" stroke="#1e3a5f" stroke-width="2" fill="none"/>
+    <text class="rotulo" x="424" y="92">50–70 cm</text>
+
+    <!-- Guias dos marcadores -->
+    <path class="guia" d="M564 152 H570"/>
+    <path class="guia" d="M200 188 L228 196"/>
+    <path class="guia" d="M156 276 L194 276"/>
+    <path class="guia" d="M430 256 L414 274"/>
+    <path class="guia" d="M414 470 H404"/>
+
+    <!-- Marcadores numerados (legenda no HTML) -->
+    <g class="marcador"><circle cx="588" cy="152" r="16"/><text x="588" y="152">1</text></g>
+    <g class="marcador"><circle cx="362" cy="86" r="16"/><text x="362" y="86">2</text></g>
+    <g class="marcador"><circle cx="184" cy="184" r="16"/><text x="184" y="184">3</text></g>
+    <g class="marcador"><circle cx="140" cy="276" r="16"/><text x="140" y="276">4</text></g>
+    <g class="marcador"><circle cx="440" cy="242" r="16"/><text x="440" y="242">5</text></g>
+    <g class="marcador"><circle cx="430" cy="470" r="16"/><text x="430" y="470">6</text></g>
+  </g>
+</svg>

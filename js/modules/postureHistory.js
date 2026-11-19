@@ -10,30 +10,12 @@ const historicoAvisos = [];
  * Registra um novo alerta de proximidade
  * @param {number} segundosPerto
  */
-
 export function registrarAvisoPostura(segundosPerto) {
-    const agora = new Date();
-    const horarioFormatado = agora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const dataFormatada = agora.toLocaleDateString([], { day: '2-digit', month: '2-digit' }); // Ex: 09/09
-
-    const novoItem = {
+    historicoAvisos.unshift({
         id: Date.now(),
-        horario: horarioFormatado,
-        hora: horarioFormatado,
-        duracao: segundosPerto,
-        segundos: segundosPerto,
-        tipo: `${segundosPerto}s contínuos`,
-        detalhes: `Muito perto por ${segundosPerto}s`,
-        mensagem: `Muito perto por ${segundosPerto}s`,
-        valor: `${segundosPerto}s`,
-        // Propriedades comuns herdadas da aba de piscadas:
-        ppm: `${segundosPerto}s`,
-        piscadas: `${segundosPerto}s`,
-        classificacao: 'Proximidade',
-        status: 'Alerta'
-    };
-    
-    historicoAvisos.unshift(novoItem);
+        horario: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        duracao: segundosPerto
+    });
     renderizarListaAvisos();
 }
 
@@ -59,30 +41,29 @@ export function renderizarListaAvisos() {
     const listaElement = document.getElementById('lista-avisos-postura');
     if (!listaElement) return;
 
-    listaElement.innerHTML = '';
+    listaElement.replaceChildren();
 
     if (historicoAvisos.length === 0) {
-        listaElement.innerHTML = `
-            <li style="text-align: center; color: var(--text-muted, #64748b); padding: 16px; font-size: 0.85rem;">
-                Nenhum aviso de proximidade registrado nesta sessão.
-            </li>
-        `;
+        const vazio = document.createElement('li');
+        vazio.className = 'aviso-vazio';
+        vazio.textContent = 'Nenhum aviso de proximidade registrado nesta sessão.';
+        listaElement.appendChild(vazio);
         return;
     }
 
     historicoAvisos.forEach(item => {
         const li = document.createElement('li');
         li.className = 'aviso-item';
-        li.innerHTML = `
-            <span class="aviso-hora">${item.horario}</span>
-            <span class="aviso-desc">Muito perto por ${item.duracao}s</span>
-        `;
+
+        const hora = document.createElement('span');
+        hora.className = 'aviso-hora';
+        hora.textContent = item.horario;
+
+        const desc = document.createElement('span');
+        desc.className = 'aviso-desc';
+        desc.textContent = `Muito perto por ${item.duracao}s`;
+
+        li.append(hora, desc);
         listaElement.appendChild(li);
     });
-}
-
-// Botão de limpar histórico do modal
-const btnLimpar = document.getElementById('btn-limpar-avisos');
-if (btnLimpar) {
-    btnLimpar.addEventListener('click', limparHistoricoAvisos);
 }
